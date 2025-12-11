@@ -9,22 +9,21 @@ import {
   child
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-// ⚙️ Ganti dengan konfigurasi Firebase milikmu
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyA_kvyDshMXYNqj87bqXZC8tKAi_Kko2Rs",
   authDomain: "rabapp-520b5.firebaseapp.com",
   databaseURL: "https://rabapp-520b5-default-rtdb.firebaseio.com",
   projectId: "rabapp-520b5",
-  storageBucket: "rabapp-520b5.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  storageBucket: "rabapp-520b5.firebasestorage.app",
+  messagingSenderId: "1060443577862",
+  appId: "1:1060443577862:web:6618775410d09ae16cad87"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // ============================================================
-// ✅ FUNGSI SIMPAN DATA RAB
+// ✅ SIMPAN DATA RAB
 // ============================================================
 export async function saveRAB(event) {
   event.preventDefault();
@@ -77,15 +76,19 @@ export async function saveRAB(event) {
 }
 
 // ============================================================
-// ✅ FUNGSI TAMPILKAN DATA DI LIST.HTML
+// ✅ TAMPILKAN DATA DI LIST.HTML
 // ============================================================
 export async function loadRABList() {
+  console.log("🔄 Memuat daftar pengajuan...");
+
   const user = JSON.parse(localStorage.getItem("loginUser"));
   if (!user) {
     alert("Anda belum login!");
     window.location.href = "index.html";
     return;
   }
+
+  console.log("👤 User login:", user);
 
   const adminDivisions = ["Direktur", "Wakil Direktur"];
   const isAdmin = adminDivisions.includes(user.division);
@@ -94,8 +97,8 @@ export async function loadRABList() {
   tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
-    const dbRef = ref(db);
-    const snapshot = await get(child(dbRef, "rabapp/pengajuan"));
+    const dbRef = ref(db, "rabapp/pengajuan");
+    const snapshot = await get(dbRef);
 
     tbody.innerHTML = "";
 
@@ -105,15 +108,13 @@ export async function loadRABList() {
     }
 
     const data = snapshot.val();
-    const allEntries = Object.entries(data).map(([id, val]) => ({
-      id,
-      ...val
-    }));
+    console.log("📦 Data diterima:", data);
 
-    // Filter sesuai divisi
+    const entries = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+
     const filtered = isAdmin
-      ? allEntries
-      : allEntries.filter(entry => entry.division === user.division);
+      ? entries
+      : entries.filter((item) => item.division === user.division);
 
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777;">Belum ada pengajuan untuk divisi Anda.</td></tr>`;
@@ -121,7 +122,7 @@ export async function loadRABList() {
     }
 
     filtered.forEach((entry) => {
-      const bulan = Array.isArray(entry.bulan)
+      const bulanText = Array.isArray(entry.bulan)
         ? entry.bulan.join(", ")
         : entry.bulan || "-";
 
@@ -129,24 +130,16 @@ export async function loadRABList() {
       tr.innerHTML = `
         <td>${entry.item}</td>
         <td>${entry.jenis}</td>
-        <td>${bulan}</td>
-        <td>Rp ${entry.total.toLocaleString("id-ID")}</td>
-        <td>
-          <span style="
-            background:${entry.status === 'Disetujui' ? '#22c55e' : entry.status === 'Ditolak' ? '#ef4444' : '#f59e0b'};
-            color:white;
-            padding:4px 10px;
-            border-radius:8px;
-            font-size:13px;
-            ">
-            ${entry.status}
-          </span>
-        </td>
+        <td>${bulanText}</td>
+        <td>Rp ${entry.total ? entry.total.toLocaleString("id-ID") : 0}</td>
+        <td>${entry.status || "Menunggu"}</td>
       `;
       tbody.appendChild(tr);
     });
+
+    console.log("✅ Data berhasil dimuat ke tabel.");
   } catch (error) {
-    console.error("Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
+    console.error("❌ Gagal memuat data:", error);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#dc2626;">Gagal memuat data: ${error.message}</td></tr>`;
   }
 }
