@@ -1,4 +1,3 @@
-// === Firebase Modular v12 Setup ===
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
@@ -12,6 +11,5 @@ const firebaseConfig = {
   appId: "1:1060443577862:web:6618775410d09ae16cad87"
 };
 
-// Inisialisasi Firebase
 export const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
