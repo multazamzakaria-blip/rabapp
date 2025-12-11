@@ -3,50 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard RAB</title>
+  <title>Rekap Admin - Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background: #0b63ce;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 22px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #0b63ce;
+      color: white;
+      text-align: left;
+      padding: 12px 10px;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 10px;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    tr:hover {
+      background: #f9fbff;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .status-menunggu { background: #f59e0b; }
+    .status-ditolak { background: #ef4444; }
+    .status-disetujui { background: #22c55e; }
+
+    .btn-aksi {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      margin: 2px;
+      transition: 0.2s;
+    }
+
+    .btn-acc { background: #16a34a; }
+    .btn-reject { background: #dc2626; }
+    .btn-acc:hover { background: #15803d; }
+    .btn-reject:hover { background: #b91c1c; }
+
+    .summary-box {
+      background: #e0f2fe;
+      border-left: 5px solid #0b63ce;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      color: #0b63ce;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    @media (max-width: 700px) {
+      th, td {
+        font-size: 13px;
+        padding: 8px;
+      }
+    }
+  </style>
 </head>
 
-<body onload="verifyAdmin()">
+<body onload="checkLogin()">
+  <div class="navbar">
+    <a href="dashboard.html">⬅ Kembali</a>
+    <h2>🛠️ Rekap Admin - Pengajuan RAB</h2>
+  </div>
 
-<div class="navbar">
-  <a href="dashboard.html">⬅ Kembali</a>
-  <h2>Dashboard Admin</h2>
-</div>
+  <div class="container">
+    <div class="summary-box">
+      Total Pengajuan Disetujui: <span id="totalAcc">Rp 0</span> | 
+      Menunggu: <span id="totalPending">Rp 0</span> | 
+      Ditolak: <span id="totalReject">Rp 0</span>
+    </div>
 
-<div class="container">
+    <table id="rabAdminTable">
+      <thead>
+        <tr>
+          <th>Nama Item</th>
+          <th>Jenis</th>
+          <th>Bulan</th>
+          <th>Harga Satuan</th>
+          <th>Jumlah</th>
+          <th>Total</th>
+          <th>Divisi</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-<table id="adminTable">
-  <thead>
-    <tr>
-      <th>Divisi</th>
-      <th>Item</th>
-      <th>Jenis</th>
-      <th>Bulan</th>
-      <th>Total</th>
-      <th>Status</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-</div>
-
-<!-- Proteksi admin -->
-<script>
-function verifyAdmin() {
-  const user = JSON.parse(localStorage.getItem("loginUser"));
-  const adminDivisions = ["Direktur", "Wakil Direktur"];
-
-  if (!user || !adminDivisions.includes(user.division)) {
-    alert("Anda tidak memiliki akses ke halaman ini.");
-    window.location.href = "dashboard.html";
-  }
-}
-</script>
-
-<script type="module" src="assets/admin.js"></script>
-
+  <script src="assets/auth.js"></script>
+  <script type="module">
+    import { loadRABAdmin } from "./assets/rab.js";
+    loadRABAdmin();
+  </script>
 </body>
 </html>
