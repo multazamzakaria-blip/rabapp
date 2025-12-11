@@ -42,8 +42,11 @@ export async function saveRAB(event) {
   const satuan = document.getElementById("satuan").value.trim();
   const harga = parseFloat(document.getElementById("harga").value);
   const jumlah = parseInt(document.getElementById("jumlah").value);
-  const bulanSelect = document.getElementById("bulan");
-  const bulanDipilih = Array.from(bulanSelect.selectedOptions).map(opt => opt.value);
+
+  const bulanCheckboxes = document.querySelectorAll("#bulan-wrapper input[type='checkbox']");
+  const bulanDipilih = Array.from(bulanCheckboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
 
   if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah || !satuan) {
     alert("⚠️ Harap isi semua kolom dengan benar.");
@@ -68,15 +71,18 @@ export async function saveRAB(event) {
   };
 
   try {
-    const newRef = push(ref(db, "rabapp/pengajuan"));
+    const dbRef = ref(db, "rabapp/pengajuan");
+    const newRef = push(dbRef);
     await set(newRef, data);
+
     alert("✅ Pengajuan berhasil disimpan!");
     window.location.href = "list.html";
   } catch (error) {
-    console.error(error);
-    alert("❌ Gagal menyimpan data: " + error.message);
+    console.error("❌ Gagal menyimpan:", error);
+    alert("Gagal menyimpan data: " + error.message);
   }
 }
+
 
 // ============================================================
 // ✅ TAMPILKAN DATA + FITUR EDIT & HAPUS
