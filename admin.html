@@ -33,7 +33,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1250px;
       margin: 40px auto;
       background: white;
       padding: 20px;
@@ -99,7 +99,7 @@
       transition: 0.2s;
     }
 
-    .btn-aksi:hover { opacity: 0.8; }
+    .btn-aksi:hover { opacity: 0.85; }
     td:last-child { text-align: center; }
 
     /* ========== MODAL ========== */
@@ -117,8 +117,8 @@
       background: white;
       border-radius: 12px;
       padding: 25px;
-      width: 380px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      width: 400px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
       animation: fadeIn 0.25s ease;
     }
 
@@ -133,12 +133,15 @@
       text-align: center;
     }
 
-    .modal-content input {
+    .modal-content input, .modal-content textarea {
       width: 100%;
       padding: 10px;
       margin-top: 8px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
     }
 
     .modal-content button {
@@ -154,6 +157,12 @@
 
     .btn-save { background: #0b63ce; }
     .btn-close { background: #6b7280; margin-top: 6px; }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 90%;
+      }
+    }
   </style>
 </head>
 
@@ -175,6 +184,7 @@
         <tr>
           <th>Nama Item</th>
           <th>Jenis</th>
+          <th>Urgensi</th>
           <th>Bulan</th>
           <th>Harga Satuan</th>
           <th>Jumlah</th>
@@ -196,6 +206,7 @@
       <input type="number" id="editHarga" placeholder="Harga Satuan (Rp)" />
       <input type="text" id="editSatuan" placeholder="Satuan (pcs/unit/paket)" />
       <input type="number" id="editJumlah" placeholder="Jumlah" />
+      <textarea id="editUrgensi" placeholder="Mengapa penting item ini?"></textarea>
       <button class="btn-save" id="btnSaveEdit">💾 Simpan Perubahan</button>
       <button class="btn-close" id="btnCloseEdit">Tutup</button>
     </div>
