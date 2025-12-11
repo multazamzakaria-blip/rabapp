@@ -6,30 +6,47 @@
   <title>Admin Dashboard RAB</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
-  <div class="navbar">
-    <a href="dashboard.html">⬅ Kembali</a>
-    <h2>Dashboard Admin</h2>
-  </div>
 
-  <div class="container">
-    <h3>Rekap Seluruh Pengajuan</h3>
-    <table id="adminTable">
-      <thead>
-        <tr>
-          <th>Divisi</th>
-          <th>Item</th>
-          <th>Jenis</th>
-          <th>Bulan</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<body onload="verifyAdmin()">
 
-  <script type="module" src="assets/admin.js"></script>
+<div class="navbar">
+  <a href="dashboard.html">⬅ Kembali</a>
+  <h2>Dashboard Admin</h2>
+</div>
+
+<div class="container">
+
+<table id="adminTable">
+  <thead>
+    <tr>
+      <th>Divisi</th>
+      <th>Item</th>
+      <th>Jenis</th>
+      <th>Bulan</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+</div>
+
+<!-- Proteksi admin -->
+<script>
+function verifyAdmin() {
+  const user = JSON.parse(localStorage.getItem("loginUser"));
+  const adminDivisions = ["Direktur", "Wakil Direktur"];
+
+  if (!user || !adminDivisions.includes(user.division)) {
+    alert("Anda tidak memiliki akses ke halaman ini.");
+    window.location.href = "dashboard.html";
+  }
+}
+</script>
+
+<script type="module" src="assets/admin.js"></script>
+
 </body>
 </html>
