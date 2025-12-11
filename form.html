@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Form Pengajuan RAB</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css" />
+
   <style>
+    body {
+      background: #f6f9fc;
+      font-family: "Poppins", sans-serif;
+    }
+
     .page-wrapper {
       max-width: 650px;
       margin: 45px auto;
@@ -16,13 +22,13 @@
       background: #ffffff;
       padding: 32px;
       border-radius: 18px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
       transition: 0.25s ease;
     }
 
     .form-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(0,0,0,0.09);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.09);
     }
 
     label {
@@ -31,6 +37,49 @@
       font-size: 15px;
       font-weight: 600;
       color: #222;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      transition: 0.25s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #0b63ce;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0a58b0;
     }
 
     /* Custom dropdown multi-select */
@@ -70,7 +119,7 @@
       border: 1px solid #d3d7de;
       border-radius: 10px;
       margin-top: 5px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
       z-index: 10;
       padding: 10px;
       width: 100%;
@@ -102,92 +151,96 @@
 </head>
 
 <body onload="checkLogin()">
-
-<div class="navbar">
-  <a href="dashboard.html" style="font-size:15px;">⬅ Kembali</a>
-  <h2 style="font-size:20px;">Form Pengajuan RAB</h2>
-</div>
-
-<div class="page-wrapper">
-  <div class="form-card">
-    <form id="rabForm">
-
-      <input type="text" id="item" placeholder="Nama Program / Item" required>
-
-      <select id="jenis" required>
-        <option value="">-- Pilih Jenis --</option>
-        <option>Program Peningkatan Mutu SDM</option>
-        <option>Program Peningkatan Mutu Santri</option>
-        <option>Pengadaan Barang</option>
-        <option>Perbaikan Rutin</option>
-        <option>Bahan Makanan</option>
-        <option>Honorium SDM</option>
-        <option>Rapat dan Koordinasi Pengurus</option>
-      </select>
-
-      <label>Bulan Pelaksanaan (bisa pilih banyak):</label>
-      <div class="multiselect">
-        <div class="selectBox" onclick="toggleCheckboxes()">
-          <span id="selectedText">Pilih Bulan</span>
-        </div>
-        <div class="checkboxes" id="bulan-wrapper">
-          <label><input type="checkbox" value="Januari"> Januari</label>
-          <label><input type="checkbox" value="Februari"> Februari</label>
-          <label><input type="checkbox" value="Maret"> Maret</label>
-          <label><input type="checkbox" value="April"> April</label>
-          <label><input type="checkbox" value="Mei"> Mei</label>
-          <label><input type="checkbox" value="Juni"> Juni</label>
-          <label><input type="checkbox" value="Juli"> Juli</label>
-          <label><input type="checkbox" value="Agustus"> Agustus</label>
-          <label><input type="checkbox" value="September"> September</label>
-          <label><input type="checkbox" value="Oktober"> Oktober</label>
-          <label><input type="checkbox" value="November"> November</label>
-          <label><input type="checkbox" value="Desember"> Desember</label>
-        </div>
-      </div>
-
-      <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
-      <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
-      <input type="number" id="jumlah" placeholder="Jumlah" required>
-
-      <button type="submit">💾 Simpan Pengajuan</button>
-    </form>
+  <div class="navbar">
+    <a href="dashboard.html" style="font-size: 15px">⬅ Kembali</a>
+    <h2 style="font-size: 20px">Form Pengajuan RAB</h2>
   </div>
-</div>
 
-<script src="assets/auth.js"></script>
+  <div class="page-wrapper">
+    <div class="form-card">
+      <form id="rabForm">
+        <input type="text" id="item" placeholder="Nama Program / Item" required />
 
-<script type="module">
-  import { saveRAB } from "./assets/rab.js";
-  document.getElementById("rabForm").addEventListener("submit", saveRAB);
-</script>
+        <select id="jenis" required>
+          <option value="">-- Pilih Jenis --</option>
+          <option>Program Peningkatan Mutu SDM</option>
+          <option>Program Peningkatan Mutu Santri</option>
+          <option>Pengadaan Barang</option>
+          <option>Perbaikan Rutin</option>
+          <option>Bahan Makanan</option>
+          <option>Honorium SDM</option>
+          <option>Rapat dan Koordinasi Pengurus</option>
+        </select>
 
-<script>
-  // Dropdown multi-select bulan
-  let expanded = false;
-  function toggleCheckboxes() {
-    const checkboxes = document.getElementById("bulan-wrapper");
-    checkboxes.classList.toggle("open");
-    expanded = !expanded;
-  }
+        <label>Bulan Pelaksanaan (bisa pilih banyak):</label>
+        <div class="multiselect">
+          <div class="selectBox" onclick="toggleCheckboxes()">
+            <span id="selectedText">Pilih Bulan</span>
+          </div>
+          <div class="checkboxes" id="bulan-wrapper">
+            <label><input type="checkbox" value="Januari" /> Januari</label>
+            <label><input type="checkbox" value="Februari" /> Februari</label>
+            <label><input type="checkbox" value="Maret" /> Maret</label>
+            <label><input type="checkbox" value="April" /> April</label>
+            <label><input type="checkbox" value="Mei" /> Mei</label>
+            <label><input type="checkbox" value="Juni" /> Juni</label>
+            <label><input type="checkbox" value="Juli" /> Juli</label>
+            <label><input type="checkbox" value="Agustus" /> Agustus</label>
+            <label><input type="checkbox" value="September" /> September</label>
+            <label><input type="checkbox" value="Oktober" /> Oktober</label>
+            <label><input type="checkbox" value="November" /> November</label>
+            <label><input type="checkbox" value="Desember" /> Desember</label>
+          </div>
+        </div>
 
-  // Update teks pilihan
-  const bulanWrapper = document.getElementById("bulan-wrapper");
-  const selectedText = document.getElementById("selectedText");
+        <textarea
+          id="urgensi"
+          placeholder="Mengapa penting item ini?"
+          required
+        ></textarea>
 
-  bulanWrapper.addEventListener("change", () => {
-    const checked = [...bulanWrapper.querySelectorAll("input:checked")].map(i => i.value);
-    selectedText.textContent = checked.length ? checked.join(", ") : "Pilih Bulan";
-  });
+        <input type="text" id="satuan" placeholder="Satuan (misal: paket, pcs, unit)" required />
+        <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required />
+        <input type="number" id="jumlah" placeholder="Jumlah" required />
 
-  // Tutup dropdown jika klik di luar area
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".multiselect")) {
-      document.getElementById("bulan-wrapper").classList.remove("open");
-      expanded = false;
+        <button type="submit">💾 Simpan Pengajuan</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/auth.js"></script>
+
+  <script type="module">
+    import { saveRAB } from "./assets/rab.js";
+    document.getElementById("rabForm").addEventListener("submit", saveRAB);
+  </script>
+
+  <script>
+    // Dropdown multi-select bulan
+    function toggleCheckboxes() {
+      const checkboxes = document.getElementById("bulan-wrapper");
+      checkboxes.classList.toggle("open");
     }
-  });
-</script>
 
+    // Update teks pilihan
+    const bulanWrapper = document.getElementById("bulan-wrapper");
+    const selectedText = document.getElementById("selectedText");
+
+    bulanWrapper.addEventListener("change", () => {
+      const checked = [...bulanWrapper.querySelectorAll("input:checked")].map(
+        (i) => i.value
+      );
+      selectedText.textContent = checked.length
+        ? checked.join(", ")
+        : "Pilih Bulan";
+    });
+
+    // Tutup dropdown jika klik di luar area
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".multiselect")) {
+        document.getElementById("bulan-wrapper").classList.remove("open");
+      }
+    });
+  </script>
 </body>
 </html>
