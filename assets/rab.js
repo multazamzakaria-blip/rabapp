@@ -216,6 +216,11 @@ export async function loadRABAdmin() {
       else if (entry.status === "Menunggu") pending += total;
       else if (entry.status === "Ditolak") reject += total;
 
+      const disableAction =
+        entry.status === "Disetujui" || entry.status === "Ditolak"
+          ? "disabled style='opacity:0.4;cursor:not-allowed;'"
+          : "";
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${entry.item}</td>
@@ -235,8 +240,8 @@ export async function loadRABAdmin() {
           }">${entry.status}</span>
         </td>
         <td style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;">
-          <button class="btn-aksi btn-acc" data-id="${id}" style="background:#22c55e;">✔ Setujui</button>
-          <button class="btn-aksi btn-reject" data-id="${id}" style="background:#ef4444;">✖ Tolak</button>
+          <button class="btn-aksi btn-acc" data-id="${id}" ${disableAction} style="background:#22c55e;">✔ Setujui</button>
+          <button class="btn-aksi btn-reject" data-id="${id}" ${disableAction} style="background:#ef4444;">✖ Tolak</button>
           <button class="btn-aksi btn-edit" data-id="${id}" style="background:#2563eb;">✏️ Edit</button>
           <button class="btn-aksi btn-del" data-id="${id}" style="background:#6b7280;">🗑️ Hapus</button>
         </td>
