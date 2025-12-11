@@ -27,7 +27,7 @@
     }
 
     .container {
-      max-width: 1150px;
+      max-width: 1200px;
       margin: 40px auto;
       background: white;
       padding: 20px;
@@ -45,13 +45,16 @@
       background: #0b63ce;
       color: white;
       text-align: left;
-      padding: 12px;
+      padding: 12px 10px;
+      font-size: 15px;
+      white-space: nowrap;
     }
 
     td {
       border-bottom: 1px solid #e5e7eb;
       padding: 10px;
       font-size: 14px;
+      vertical-align: top;
     }
 
     tr:hover {
@@ -60,10 +63,11 @@
 
     .status {
       display: inline-block;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       color: white;
       font-size: 13px;
+      text-align: center;
     }
 
     .status-menunggu { background: #f59e0b; }
@@ -74,22 +78,36 @@
       background: #6b7280;
       border: none;
       color: white;
-      padding: 5px 8px;
+      padding: 5px 10px;
       border-radius: 6px;
       cursor: pointer;
+      transition: 0.2s;
     }
 
-    .btn-del:hover { opacity: 0.8; }
+    .btn-del:hover { opacity: 0.85; }
+
+    .summary-box {
+      background: #e0f2fe;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      color: #0b63ce;
+      font-weight: 600;
+    }
   </style>
 </head>
 
 <body>
   <div class="navbar">
     <a href="dashboard.html">⬅ Kembali</a>
-    <h3>Daftar Pengajuan RAB</h3>
+    <h2>📋 Daftar Pengajuan RAB</h2>
   </div>
 
   <div class="container">
+    <div class="summary-box">
+      Total Pengajuan Anda: <span id="totalAll">Rp 0</span>
+    </div>
+
     <table id="rabUserTable">
       <thead>
         <tr>
@@ -127,10 +145,11 @@
     const db = getDatabase(app);
 
     const tbody = document.querySelector("#rabUserTable tbody");
+    const totalAll = document.getElementById("totalAll");
     const user = JSON.parse(localStorage.getItem("loginUser"));
 
     if (!user) {
-      alert("Silakan login dulu!");
+      alert("Silakan login terlebih dahulu!");
       window.location.href = "index.html";
     }
 
@@ -146,16 +165,18 @@
         }
 
         const data = snapshot.val();
-        let found = false;
+        let totalUser = 0;
+        let hasData = false;
 
         Object.entries(data).forEach(([id, entry]) => {
-          if (entry.username !== user.username) return; // hanya tampilkan milik user login
-          found = true;
+          if (entry.username !== user.username) return;
 
+          hasData = true;
           const bulanText = Array.isArray(entry.bulan)
             ? entry.bulan.join(", ")
             : entry.bulan || "-";
           const total = entry.total || 0;
+          totalUser += total;
 
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -177,13 +198,19 @@
               }">${entry.status}</span>
             </td>
             <td>
-              <button class="btn-del" data-id="${id}">🗑️ Hapus</button>
+              ${
+                entry.status === "Menunggu"
+                  ? `<button class="btn-del" data-id="${id}">🗑️ Hapus</button>`
+                  : "-"
+              }
             </td>
           `;
           tbody.appendChild(tr);
         });
 
-        if (!found) {
+        totalAll.innerText = "Rp " + totalUser.toLocaleString("id-ID");
+
+        if (!hasData) {
           tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada pengajuan dari akun Anda.</td></tr>`;
         }
 
