@@ -6,25 +6,43 @@
   <title>Dashboard RAB</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
+
 <body onload="checkLogin()">
-  <div class="navbar">
-    <h2>Dashboard RAB</h2>
-    <button onclick="logout()">Keluar</button>
-  </div>
 
-  <div class="container">
-    <h3 id="welcome"></h3>
-    <div class="menu">
-      <a href="form.html">+ Buat Pengajuan RAB</a>
-      <a href="list.html">📋 Daftar Pengajuan Saya</a>
-      <a href="admin.html">🛠️ Rekap Admin</a>
-    </div>
-  </div>
+<div class="navbar">
+  <h2>Dashboard RAB</h2>
+  <button onclick="logout()">Keluar</button>
+</div>
 
-  <script src="assets/auth.js"></script>
-  <script>
-    const user = JSON.parse(localStorage.getItem("loginUser"));
-    document.getElementById("welcome").innerText = `Selamat datang, ${user.name} (${user.division})`;
-  </script>
+<div class="container">
+  <h3 id="welcome"></h3>
+
+  <div class="menu">
+    <a href="form.html">+ Buat Pengajuan RAB</a>
+    <a href="list.html">📄 Daftar Pengajuan Saya</a>
+
+    <!-- Hanya admin yang boleh melihat tombol ini -->
+    <a href="admin.html" id="adminMenu">🛠️ Rekap Admin</a>
+  </div>
+</div>
+
+<script src="assets/auth.js"></script>
+<script>
+  const user = JSON.parse(localStorage.getItem("loginUser"));
+
+  // Tampilkan nama user
+  document.getElementById("welcome").innerText =
+    `Selamat datang, ${user.name} (${user.division})`;
+
+  // Divisi yang dianggap admin
+  const adminDivisions = ["Direktur", "Wakil Direktur"];
+
+  // Tampilkan/hilangkan menu admin
+  const adminMenu = document.getElementById("adminMenu");
+  if (!adminDivisions.includes(user.division)) {
+    adminMenu.style.display = "none"; // sembunyikan
+  }
+</script>
+
 </body>
 </html>
