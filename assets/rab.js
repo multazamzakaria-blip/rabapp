@@ -178,11 +178,11 @@ export async function loadRABList() {
 }
 
 // ============================================================
-// ✅ ADMIN: LIHAT & SETUJUI / TOLAK PENGAJUAN
+// ✅ ADMIN: LIHAT, SETUJUI / TOLAK / EDIT / HAPUS PENGAJUAN
 // ============================================================
 export async function loadRABAdmin() {
   const user = JSON.parse(localStorage.getItem("loginUser"));
-  if (!user) { // 🟢 ubah: jangan batasi hanya Direktur/Wadir
+  if (!user) {
     alert("Anda belum login!");
     window.location.href = "index.html";
     return;
@@ -193,14 +193,14 @@ export async function loadRABAdmin() {
   const totalPending = document.getElementById("totalPending");
   const totalReject = document.getElementById("totalReject");
 
-  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
     const snapshot = await get(ref(db, "rabapp/pengajuan"));
     tbody.innerHTML = "";
 
     if (!snapshot.exists()) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#777;">Belum ada data.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada data.</td></tr>`;
       return;
     }
 
@@ -208,7 +208,9 @@ export async function loadRABAdmin() {
     let acc = 0, pending = 0, reject = 0;
 
     Object.entries(data).forEach(([id, entry]) => {
-      const bulanText = Array.isArray(entry.bulan) ? entry.bulan.join(", ") : entry.bulan || "-";
+      const bulanText = Array.isArray(entry.bulan)
+        ? entry.bulan.join(", ")
+        : entry.bulan || "-";
       const total = entry.total || 0;
       if (entry.status === "Disetujui") acc += total;
       else if (entry.status === "Menunggu") pending += total;
@@ -232,9 +234,11 @@ export async function loadRABAdmin() {
               : "status-menunggu"
           }">${entry.status}</span>
         </td>
-        <td>
-          <button class="btn-aksi btn-acc" data-id="${id}">✔ Setujui</button>
-          <button class="btn-aksi btn-reject" data-id="${id}">✖ Tolak</button>
+        <td style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;">
+          <button class="btn-aksi btn-acc" data-id="${id}" style="background:#22c55e;">✔ Setujui</button>
+          <button class="btn-aksi btn-reject" data-id="${id}" style="background:#ef4444;">✖ Tolak</button>
+          <button class="btn-aksi btn-edit" data-id="${id}" style="background:#2563eb;">✏️ Edit</button>
+          <button class="btn-aksi btn-del" data-id="${id}" style="background:#6b7280;">🗑️ Hapus</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -244,7 +248,7 @@ export async function loadRABAdmin() {
     totalPending.innerText = "Rp " + pending.toLocaleString("id-ID");
     totalReject.innerText = "Rp " + reject.toLocaleString("id-ID");
 
-    // === SETUJUI / TOLAK ===
+    // === SETUJUI ===
     document.querySelectorAll(".btn-acc").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         const id = e.target.dataset.id;
@@ -254,6 +258,7 @@ export async function loadRABAdmin() {
       });
     });
 
+    // === TOLAK ===
     document.querySelectorAll(".btn-reject").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         const id = e.target.dataset.id;
@@ -263,8 +268,46 @@ export async function loadRABAdmin() {
       });
     });
 
+    // === EDIT ===
+    document.querySelectorAll(".btn-edit").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        const entry = data[id];
+        if (!entry) return;
+
+        const newNama = prompt("Edit nama item:", entry.item);
+        const newHarga = prompt("Edit harga satuan:", entry.harga);
+        const newSatuan = prompt("Edit satuan:", entry.satuan || "pcs");
+        const newJumlah = prompt("Edit jumlah:", entry.jumlah);
+
+        if (newNama && newHarga && newJumlah && newSatuan) {
+          await update(ref(db, "rabapp/pengajuan/" + id), {
+            item: newNama,
+            harga: parseFloat(newHarga),
+            satuan: newSatuan,
+            jumlah: parseInt(newJumlah),
+            total: parseFloat(newHarga) * parseInt(newJumlah),
+          });
+          alert("✅ Data berhasil diperbarui!");
+          loadRABAdmin();
+        }
+      });
+    });
+
+    // === HAPUS ===
+    document.querySelectorAll(".btn-del").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Yakin ingin menghapus item ini?")) {
+          await remove(ref(db, "rabapp/pengajuan/" + id));
+          alert("🗑️ Data berhasil dihapus!");
+          loadRABAdmin();
+        }
+      });
+    });
+
   } catch (error) {
     console.error("Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
