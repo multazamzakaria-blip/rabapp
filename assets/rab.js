@@ -4,7 +4,6 @@ import {
   getDatabase,
   ref,
   push,
-  set,
   get,
   update,
   remove,
@@ -62,8 +61,8 @@ export async function saveRAB(e) {
       total,
       status: "Menunggu",
       createdAt: new Date().toISOString(),
-      createdBy: user.name,
-      division: user.division
+      createdBy: user.name || user.username,
+      division: user.division || "Belum Ditentukan" // 🟢 Tambahan penting
     });
 
     alert("✅ Pengajuan berhasil disimpan!");
@@ -103,8 +102,6 @@ export async function loadRABList() {
 
     const data = snapshot.val();
     const entries = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-
-    // Jika bukan admin, tampilkan hanya divisi user
     const filtered = isAdmin ? entries : entries.filter(e => e.division === user.division);
 
     filtered.forEach((entry) => {
@@ -179,14 +176,15 @@ export async function loadRABList() {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
+
 // ============================================================
 // ✅ ADMIN: LIHAT & SETUJUI / TOLAK PENGAJUAN
 // ============================================================
 export async function loadRABAdmin() {
   const user = JSON.parse(localStorage.getItem("loginUser"));
-  if (!user || !["Direktur", "Wakil Direktur"].includes(user.division)) {
-    alert("Akses ditolak. Hanya admin yang bisa membuka halaman ini!");
-    window.location.href = "dashboard.html";
+  if (!user) { // 🟢 ubah: jangan batasi hanya Direktur/Wadir
+    alert("Anda belum login!");
+    window.location.href = "index.html";
     return;
   }
 
@@ -267,6 +265,6 @@ export async function loadRABAdmin() {
 
   } catch (error) {
     console.error("Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;">Gagal memuat data.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
