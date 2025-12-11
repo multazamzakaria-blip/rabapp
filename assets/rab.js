@@ -58,27 +58,34 @@ export async function loadRABList() {
       const tr = document.createElement("tr");
 
       tr.innerHTML = `
-        <td>${entry.item}</td>
-        <td>${entry.jenis}</td>
-        <td>${bulanText}</td>
-        <td>Rp ${entry.harga?.toLocaleString("id-ID")}</td>
-        <td>${entry.satuan || "-"}</td>
-        <td>${entry.jumlah}</td>
-        <td>Rp ${entry.total?.toLocaleString("id-ID")}</td>
-        <td>
-          <span class="status ${
-            entry.status === "Disetujui"
-              ? "status-disetujui"
-              : entry.status === "Ditolak"
-              ? "status-ditolak"
-              : "status-menunggu"
-          }">${entry.status}</span>
-        </td>
-        <td style="text-align:center;">
-          <button class="btn-edit" data-id="${entry.id}">✏️</button>
-          <button class="btn-del" data-id="${entry.id}">🗑️</button>
-        </td>
-      `;
+  <td>${entry.item}</td>
+  <td>${entry.jenis}</td>
+  <td>${bulanText}</td>
+  <!-- 4: Harga Satuan -->
+  <td>Rp ${entry.harga ? entry.harga.toLocaleString("id-ID") : "-"}</td>
+  <!-- 5: Satuan (pcs/unit/paket) -->
+  <td>${entry.satuan || "-"}</td>
+  <!-- 6: Jumlah -->
+  <td>${entry.jumlah ?? "-"}</td>
+  <!-- 7: Total -->
+  <td>Rp ${entry.total ? entry.total.toLocaleString("id-ID") : "-"}</td>
+  <!-- 8: Status -->
+  <td>
+    <span class="status ${
+      entry.status === "Disetujui"
+        ? "status-disetujui"
+        : entry.status === "Ditolak"
+        ? "status-ditolak"
+        : "status-menunggu"
+    }">${entry.status}</span>
+  </td>
+  <!-- 9: Aksi -->
+  <td style="text-align:center;">
+    <button class="btn-edit" data-id="${entry.id}">✏️</button>
+    <button class="btn-del" data-id="${entry.id}">🗑️</button>
+  </td>
+`;
+
       tbody.appendChild(tr);
     });
 
