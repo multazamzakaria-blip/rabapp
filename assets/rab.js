@@ -1,53 +1,57 @@
+// assets/rab.js
 import { db } from "./firebase.js";
 import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-function getUser() {
-  return JSON.parse(localStorage.getItem("loginUser"));
-}
-
 export function saveRAB(event) {
-  event.preventDefault();
+  event.preventDefault(); // Hindari reload halaman
 
-  const user = getUser();
+  const user = JSON.parse(localStorage.getItem("loginUser"));
   if (!user) {
     alert("Anda belum login.");
+    window.location.href = "index.html";
     return;
   }
 
-  // Ambil bulan tercentang
-  const bulan = Array.from(
-    document.querySelectorAll("#bulan-wrapper input[type='checkbox']:checked")
-  ).map(c => c.value);
+  // Ambil nilai form
+  const item = document.getElementById("item").value.trim();
+  const jenis = document.getElementById("jenis").value;
+  const urgensi = document.getElementById("urgensi").value.trim();
+  const harga = parseFloat(document.getElementById("harga").value) || 0;
+  const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
 
-  if (bulan.length === 0) {
-    alert("Pilih minimal satu bulan pelaksanaan.");
+  // Ambil bulan yang dipilih (dari checkbox dropdown)
+  const bulanDipilih = Array.from(document.querySelectorAll("#bulan-wrapper input:checked"))
+    .map(b => b.value);
+
+  if (!item || !jenis || bulanDipilih.length === 0 || harga <= 0 || jumlah <= 0) {
+    alert("Harap isi semua kolom dengan benar!");
     return;
   }
 
+  const total = harga * jumlah;
   const data = {
-    item: document.getElementById("item").value,
-    jenis: document.getElementById("jenis").value,
-    bulan: bulan,
-    urgensi: document.getElementById("urgensi").value,
-    harga: Number(document.getElementById("harga").value),
-    jumlah: Number(document.getElementById("jumlah").value),
-    total: Number(document.getElementById("harga").value) * Number(document.getElementById("jumlah").value),
-    status: "Menunggu",
+    item,
+    jenis,
+    bulan: bulanDipilih,
+    urgensi,
+    harga,
+    jumlah,
+    total,
     division: user.division,
     createdBy: user.name,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    status: "Menunggu"
   };
 
-  const rabRef = ref(db, "rabapp/rab");
-  const newEntry = push(rabRef);
-
-  set(newEntry, data)
+  // Simpan ke Firebase
+  const newRef = push(ref(db, "rabapp/pengajuan"));
+  set(newRef, data)
     .then(() => {
-      alert("Pengajuan berhasil disimpan!");
+      alert("✅ Pengajuan berhasil disimpan!");
       window.location.href = "list.html";
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal menyimpan: " + err.message);
+    .catch((err) => {
+      console.error("❌ Gagal menyimpan:", err);
+      alert("Gagal menyimpan data. Periksa koneksi Anda atau konfigurasi Firebase.");
     });
 }
