@@ -26,9 +26,7 @@ const db = getDatabase(app);
 // ============================================================
 // ✅ SIMPAN DATA RAB
 // ============================================================
-export async function saveRAB(event) {
-  event.preventDefault();
-
+export async function loadRABList() {
   const user = JSON.parse(localStorage.getItem("loginUser"));
   if (!user) {
     alert("Anda belum login!");
@@ -36,52 +34,95 @@ export async function saveRAB(event) {
     return;
   }
 
-  const item = document.getElementById("item").value.trim();
-  const jenis = document.getElementById("jenis").value;
-  const urgensi = document.getElementById("urgensi").value.trim();
-  const satuan = document.getElementById("satuan").value.trim();
-  const harga = parseFloat(document.getElementById("harga").value);
-  const jumlah = parseInt(document.getElementById("jumlah").value);
+  const adminDivisions = ["Direktur", "Wakil Direktur"];
+  const isAdmin = adminDivisions.includes(user.division);
 
-  const bulanCheckboxes = document.querySelectorAll("#bulan-wrapper input[type='checkbox']");
-  const bulanDipilih = Array.from(bulanCheckboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
-
-  if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah || !satuan) {
-    alert("⚠️ Harap isi semua kolom dengan benar.");
-    return;
-  }
-
-  const total = harga * jumlah;
-
-  const data = {
-    item,
-    jenis,
-    bulan: bulanDipilih,
-    satuan,
-    urgensi,
-    harga,
-    jumlah,
-    total,
-    createdBy: user.name,
-    division: user.division,
-    status: "Menunggu",
-    createdAt: new Date().toISOString()
-  };
+  const tbody = document.querySelector("#rabTable tbody");
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
-    const dbRef = ref(db, "rabapp/pengajuan");
-    const newRef = push(dbRef);
-    await set(newRef, data);
+    const snapshot = await get(ref(db, "rabapp/pengajuan"));
+    tbody.innerHTML = "";
 
-    alert("✅ Pengajuan berhasil disimpan!");
-    window.location.href = "list.html";
+    if (!snapshot.exists()) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
+      return;
+    }
+
+    const data = snapshot.val();
+    const entries = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+    const filtered = isAdmin ? entries : entries.filter(e => e.division === user.division);
+
+    filtered.forEach((entry) => {
+      const bulanText = Array.isArray(entry.bulan) ? entry.bulan.join(", ") : entry.bulan || "-";
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${entry.item}</td>
+        <td>${entry.jenis}</td>
+        <td>${bulanText}</td>
+        <td>Rp ${entry.harga?.toLocaleString("id-ID")}</td>
+        <td>${entry.jumlah}</td>
+        <td>Rp ${entry.total?.toLocaleString("id-ID")}</td>
+        <td>
+          <span class="status ${
+            entry.status === "Disetujui"
+              ? "status-disetujui"
+              : entry.status === "Ditolak"
+              ? "status-ditolak"
+              : "status-menunggu"
+          }">${entry.status}</span>
+        </td>
+        <td style="text-align:center;">
+          <button class="btn-edit" data-id="${entry.id}">✏️</button>
+          <button class="btn-del" data-id="${entry.id}">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // === EDIT ===
+    document.querySelectorAll(".btn-edit").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        const data = entries.find((x) => x.id === id);
+        if (!data) return;
+
+        const newNama = prompt("Edit nama item:", data.item);
+        const newHarga = prompt("Edit harga satuan:", data.harga);
+        const newJumlah = prompt("Edit jumlah:", data.jumlah);
+
+        if (newNama && newHarga && newJumlah) {
+          await update(ref(db, "rabapp/pengajuan/" + id), {
+            item: newNama,
+            harga: parseFloat(newHarga),
+            jumlah: parseInt(newJumlah),
+            total: parseFloat(newHarga) * parseInt(newJumlah)
+          });
+          alert("✅ Data berhasil diperbarui!");
+          loadRABList();
+        }
+      });
+    });
+
+    // === HAPUS ===
+    document.querySelectorAll(".btn-del").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Yakin ingin menghapus item ini?")) {
+          await remove(ref(db, "rabapp/pengajuan/" + id));
+          alert("🗑️ Data berhasil dihapus!");
+          loadRABList();
+        }
+      });
+    });
+
   } catch (error) {
-    console.error("❌ Gagal menyimpan:", error);
-    alert("Gagal menyimpan data: " + error.message);
+    console.error("Gagal memuat data:", error);
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
+
 
 
 // ============================================================
