@@ -74,17 +74,19 @@
     .status-ditolak { background: #ef4444; }
     .status-disetujui { background: #22c55e; }
 
-    .btn-del {
-      background: #6b7280;
+    .btn-del, .btn-edit {
       border: none;
       color: white;
-      padding: 5px 10px;
+      padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
       transition: 0.2s;
     }
 
-    .btn-del:hover { opacity: 0.85; }
+    .btn-del { background: #6b7280; }
+    .btn-edit { background: #2563eb; }
+
+    .btn-del:hover, .btn-edit:hover { opacity: 0.85; }
 
     .summary-box {
       background: #e0f2fe;
@@ -94,6 +96,45 @@
       color: #0b63ce;
       font-weight: 600;
     }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      width: 400px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .modal-content h3 {
+      text-align: center;
+      color: #0b63ce;
+      margin-top: 0;
+    }
+
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+
+    .btn-save { background:#0b63ce;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px; }
+    .btn-close { background:#6b7280;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:8px; }
+
   </style>
 </head>
 
@@ -127,9 +168,23 @@
     </table>
   </div>
 
+  <!-- MODAL EDIT -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Pengajuan Anda</h3>
+      <input type="text" id="editItem" placeholder="Nama Item" />
+      <input type="text" id="editSatuan" placeholder="Satuan (paket/unit)" />
+      <input type="number" id="editHarga" placeholder="Harga Satuan (Rp)" />
+      <input type="number" id="editJumlah" placeholder="Jumlah" />
+      <textarea id="editUrgensi" placeholder="Mengapa penting item ini?"></textarea>
+      <button class="btn-save" id="btnSaveEdit">💾 Simpan Perubahan</button>
+      <button class="btn-close" id="btnCloseEdit">Tutup</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+    import { getDatabase, ref, get, remove, update } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA_kvyDshMXYNqj87bqXZC8tKAi_Kko2Rs",
@@ -147,6 +202,10 @@
     const tbody = document.querySelector("#rabUserTable tbody");
     const totalAll = document.getElementById("totalAll");
     const user = JSON.parse(localStorage.getItem("loginUser"));
+    const modal = document.getElementById("editModal");
+    const btnSaveEdit = document.getElementById("btnSaveEdit");
+    const btnCloseEdit = document.getElementById("btnCloseEdit");
+    let currentEditId = null;
 
     if (!user) {
       alert("Silakan login terlebih dahulu!");
@@ -170,7 +229,6 @@
         let hasData = false;
 
         Object.entries(data).forEach(([id, entry]) => {
-          // ==== FILTER DATA MILIK USER ====
           const sameUser =
             entry.username === user.username ||
             entry.createdBy === user.username ||
@@ -178,8 +236,8 @@
             entry.createdBy === user.fullname;
 
           if (!sameUser) return;
-
           hasData = true;
+
           const bulanText = Array.isArray(entry.bulan)
             ? entry.bulan.join(", ")
             : entry.bulan || "-";
@@ -205,10 +263,13 @@
                   : "status-menunggu"
               }">${entry.status}</span>
             </td>
-            <td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
               ${
                 entry.status === "Menunggu"
-                  ? `<button class="btn-del" data-id="${id}">🗑️ Hapus</button>`
+                  ? `
+                    <button class="btn-edit" data-id="${id}">✏️ Edit</button>
+                    <button class="btn-del" data-id="${id}">🗑️ Hapus</button>
+                    `
                   : "-"
               }
             </td>
@@ -233,11 +294,64 @@
             }
           });
         });
+
+        // Tombol edit
+        document.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const id = e.target.dataset.id;
+            const entry = data[id];
+            if (!entry) return;
+
+            currentEditId = id;
+            document.getElementById("editItem").value = entry.item || "";
+            document.getElementById("editSatuan").value = entry.satuan || "";
+            document.getElementById("editHarga").value = entry.harga || "";
+            document.getElementById("editJumlah").value = entry.jumlah || "";
+            document.getElementById("editUrgensi").value = entry.urgensi || "";
+
+            modal.style.display = "flex";
+          });
+        });
+
       } catch (err) {
         console.error("Gagal memuat data:", err);
         tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#dc2626;">Gagal memuat data.</td></tr>`;
       }
     }
+
+    // Simpan Edit
+    btnSaveEdit.onclick = async () => {
+      if (!currentEditId) return;
+
+      const newItem = document.getElementById("editItem").value.trim();
+      const newSatuan = document.getElementById("editSatuan").value.trim();
+      const newHarga = parseFloat(document.getElementById("editHarga").value);
+      const newJumlah = parseInt(document.getElementById("editJumlah").value);
+      const newUrgensi = document.getElementById("editUrgensi").value.trim();
+
+      if (!newItem || !newSatuan || isNaN(newHarga) || isNaN(newJumlah)) {
+        alert("Mohon isi semua kolom dengan benar!");
+        return;
+      }
+
+      await update(ref(db, "rabapp/pengajuan/" + currentEditId), {
+        item: newItem,
+        satuan: newSatuan,
+        harga: newHarga,
+        jumlah: newJumlah,
+        urgensi: newUrgensi,
+        total: newHarga * newJumlah,
+      });
+
+      alert("✅ Data berhasil diperbarui!");
+      modal.style.display = "none";
+      loadUserRAB();
+    };
+
+    btnCloseEdit.onclick = () => (modal.style.display = "none");
+    window.onclick = (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    };
 
     loadUserRAB();
   </script>
