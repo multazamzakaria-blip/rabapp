@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rekap Admin - Pengajuan RAB</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css" />
+
   <style>
     body {
       font-family: "Poppins", sans-serif;
       background: #f8fafc;
-      margin: 0;
-      padding: 0;
     }
 
     .navbar {
@@ -29,6 +28,11 @@
       font-weight: 500;
     }
 
+    .navbar h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+
     .container {
       max-width: 1200px;
       margin: 40px auto;
@@ -37,6 +41,15 @@
       border-radius: 14px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
       overflow-x: auto;
+    }
+
+    .summary-box {
+      background: #e0f2fe;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      color: #0b63ce;
+      font-weight: 600;
     }
 
     table {
@@ -78,52 +91,35 @@
     .status-disetujui { background: #22c55e; }
 
     .btn-aksi {
-      padding: 6px 10px;
       border: none;
+      padding: 6px 10px;
       border-radius: 6px;
-      cursor: pointer;
+      color: white;
       font-size: 13px;
-      font-weight: 500;
-      color: #fff;
-      margin: 2px;
+      cursor: pointer;
       transition: 0.2s;
     }
 
-    .btn-acc { background: #16a34a; }
-    .btn-reject { background: #dc2626; }
-    .btn-acc:hover { background: #15803d; }
-    .btn-reject:hover { background: #b91c1c; }
-
-    .summary-box {
-      background: #e0f2fe;
-      border-left: 5px solid #0b63ce;
-      margin-bottom: 20px;
-      padding: 15px;
-      border-radius: 10px;
-      color: #0b63ce;
-      font-weight: 600;
-      font-size: 15px;
+    .btn-aksi:hover {
+      opacity: 0.8;
     }
 
-    @media (max-width: 700px) {
-      th, td {
-        font-size: 13px;
-        padding: 8px;
-      }
+    td:last-child {
+      text-align: center;
     }
   </style>
 </head>
 
-<body onload="checkLogin()">
+<body>
   <div class="navbar">
     <a href="dashboard.html">⬅ Kembali</a>
-    <h2>🛠️ Rekap Admin - Pengajuan RAB</h2>
+    <h2>⚙️ Rekap Admin - Pengajuan RAB</h2>
   </div>
 
   <div class="container">
     <div class="summary-box">
-      Total Pengajuan Disetujui: <span id="totalAcc">Rp 0</span> | 
-      Menunggu: <span id="totalPending">Rp 0</span> | 
+      Total Pengajuan Disetujui: <span id="totalAcc">Rp 0</span> |
+      Menunggu: <span id="totalPending">Rp 0</span> |
       Ditolak: <span id="totalReject">Rp 0</span>
     </div>
 
@@ -146,6 +142,7 @@
   </div>
 
   <script src="assets/auth.js"></script>
+
   <script type="module">
     import { loadRABAdmin } from "./assets/rab.js";
     loadRABAdmin();
