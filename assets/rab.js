@@ -1,75 +1,88 @@
-// assets/rab.js
-import { db } from "./firebase.js";
-import { ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+// ========== KONFIGURASI FIREBASE ==========
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  get,
+  child
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-// === FUNGSI SIMPAN (sudah ada di versi sebelumnya) ===
+// ⚙️ Ganti dengan konfigurasi Firebase milikmu
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "rabapp-520b5.firebaseapp.com",
+  databaseURL: "https://rabapp-520b5-default-rtdb.firebaseio.com",
+  projectId: "rabapp-520b5",
+  storageBucket: "rabapp-520b5.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ============================================================
+// ✅ FUNGSI SIMPAN DATA RAB
+// ============================================================
 export async function saveRAB(event) {
   event.preventDefault();
-  const btn = event.target.querySelector("button[type='submit']");
-  const originalText = btn.innerHTML;
-  btn.innerHTML = "⏳ Menyimpan...";
-  btn.disabled = true;
+
+  const user = JSON.parse(localStorage.getItem("loginUser"));
+  if (!user) {
+    alert("Anda belum login!");
+    window.location.href = "index.html";
+    return;
+  }
+
+  const item = document.getElementById("item").value.trim();
+  const jenis = document.getElementById("jenis").value;
+  const urgensi = document.getElementById("urgensi").value.trim();
+  const harga = parseFloat(document.getElementById("harga").value);
+  const jumlah = parseInt(document.getElementById("jumlah").value);
+  const bulanSelect = document.getElementById("bulan");
+  const bulanDipilih = Array.from(bulanSelect.selectedOptions).map(opt => opt.value);
+
+  if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah) {
+    alert("⚠️ Harap isi semua kolom dengan benar.");
+    return;
+  }
+
+  const total = harga * jumlah;
+
+  const data = {
+    item,
+    jenis,
+    bulan: bulanDipilih,
+    urgensi,
+    harga,
+    jumlah,
+    total,
+    createdBy: user.name,
+    division: user.division,
+    status: "Menunggu",
+    createdAt: new Date().toISOString()
+  };
 
   try {
-    const user = JSON.parse(localStorage.getItem("loginUser"));
-    if (!user) {
-      alert("Anda belum login. Silakan login dulu.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const item = document.getElementById("item").value.trim();
-    const jenis = document.getElementById("jenis").value;
-    const urgensi = document.getElementById("urgensi").value.trim();
-    const harga = parseFloat(document.getElementById("harga").value);
-    const jumlah = parseInt(document.getElementById("jumlah").value);
-
-    const bulanDipilih = Array.from(
-      document.querySelectorAll("#bulan-wrapper input:checked")
-    ).map(el => el.value);
-
-    if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah) {
-      alert("Harap isi semua kolom dengan benar dan pilih minimal satu bulan.");
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      return;
-    }
-
-    const total = harga * jumlah;
-
-    const data = {
-      item,
-      jenis,
-      bulan: bulanDipilih,
-      urgensi,
-      harga,
-      jumlah,
-      total,
-      createdBy: user.name,
-      division: user.division,
-      status: "Menunggu",
-      createdAt: new Date().toISOString(),
-    };
-
-    const newDataRef = push(ref(db, "rabapp/pengajuan"));
-    await set(newDataRef, data);
-
-    showToast("✅ Pengajuan berhasil disimpan!");
-    setTimeout(() => (window.location.href = "list.html"), 1500);
+    const newRef = push(ref(db, "rabapp/pengajuan"));
+    await set(newRef, data);
+    alert("✅ Pengajuan berhasil disimpan!");
+    window.location.href = "list.html";
   } catch (error) {
-    console.error("Gagal menyimpan data:", error);
-    showToast("❌ Gagal menyimpan: " + error.message, true);
-  } finally {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+    console.error(error);
+    alert("❌ Gagal menyimpan data: " + error.message);
   }
 }
 
-// === FUNGSI TAMPILKAN DATA DI LIST.HTML ===
+// ============================================================
+// ✅ FUNGSI TAMPILKAN DATA DI LIST.HTML
+// ============================================================
 export async function loadRABList() {
   const user = JSON.parse(localStorage.getItem("loginUser"));
   if (!user) {
-    alert("Anda belum login.");
+    alert("Anda belum login!");
     window.location.href = "index.html";
     return;
   }
@@ -77,57 +90,63 @@ export async function loadRABList() {
   const adminDivisions = ["Direktur", "Wakil Direktur"];
   const isAdmin = adminDivisions.includes(user.division);
 
+  const tbody = document.querySelector("#rabTable tbody");
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+
   try {
-    const snapshot = await get(child(ref(db), "rabapp/pengajuan"));
-    const tableBody = document.querySelector("#rabTable tbody");
-    tableBody.innerHTML = "";
+    const dbRef = ref(db);
+    const snapshot = await get(child(dbRef, "rabapp/pengajuan"));
 
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      const entries = Object.values(data);
+    tbody.innerHTML = "";
 
-      const filtered = isAdmin
-        ? entries
-        : entries.filter(item => item.division === user.division);
-
-      if (filtered.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">Belum ada pengajuan</td></tr>`;
-        return;
-      }
-
-      filtered.forEach(item => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.item}</td>
-          <td>${item.jenis}</td>
-          <td>${item.bulan.join(", ")}</td>
-          <td>Rp ${item.total.toLocaleString("id-ID")}</td>
-          <td>${item.status}</td>
-        `;
-        tableBody.appendChild(row);
-      });
-    } else {
-      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">Belum ada data</td></tr>`;
+    if (!snapshot.exists()) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
+      return;
     }
+
+    const data = snapshot.val();
+    const allEntries = Object.entries(data).map(([id, val]) => ({
+      id,
+      ...val
+    }));
+
+    // Filter sesuai divisi
+    const filtered = isAdmin
+      ? allEntries
+      : allEntries.filter(entry => entry.division === user.division);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777;">Belum ada pengajuan untuk divisi Anda.</td></tr>`;
+      return;
+    }
+
+    filtered.forEach((entry) => {
+      const bulan = Array.isArray(entry.bulan)
+        ? entry.bulan.join(", ")
+        : entry.bulan || "-";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${entry.item}</td>
+        <td>${entry.jenis}</td>
+        <td>${bulan}</td>
+        <td>Rp ${entry.total.toLocaleString("id-ID")}</td>
+        <td>
+          <span style="
+            background:${entry.status === 'Disetujui' ? '#22c55e' : entry.status === 'Ditolak' ? '#ef4444' : '#f59e0b'};
+            color:white;
+            padding:4px 10px;
+            border-radius:8px;
+            font-size:13px;
+            ">
+            ${entry.status}
+          </span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
   } catch (error) {
     console.error("Gagal memuat data:", error);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
-}
-
-// === FUNGSI NOTIFIKASI ===
-function showToast(message, isError = false) {
-  const toast = document.createElement("div");
-  toast.textContent = message;
-  toast.style.position = "fixed";
-  toast.style.bottom = "30px";
-  toast.style.right = "30px";
-  toast.style.padding = "14px 22px";
-  toast.style.borderRadius = "10px";
-  toast.style.background = isError ? "#dc2626" : "#16a34a";
-  toast.style.color = "#fff";
-  toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-  toast.style.fontSize = "15px";
-  toast.style.zIndex = "1000";
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
 }
