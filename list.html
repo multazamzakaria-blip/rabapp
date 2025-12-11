@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar RAB</title>
+  <title>Daftar Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
-<body onload="loadRABList()">
+<body>
   <div class="navbar">
     <a href="dashboard.html">⬅ Kembali</a>
     <h2>Daftar Pengajuan RAB</h2>
@@ -28,6 +28,9 @@
   </div>
 
   <script src="assets/auth.js"></script>
-  <script src="assets/rab.js"></script>
+  <script type="module">
+    import { loadRABList } from "./assets/rab.js";
+    loadRABList();
+  </script>
 </body>
 </html>
