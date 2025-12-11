@@ -1,10 +1,10 @@
 // assets/rab.js
 import { db } from "./firebase.js";
-import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
+// === FUNGSI SIMPAN (sudah ada di versi sebelumnya) ===
 export async function saveRAB(event) {
-  event.preventDefault(); // hindari reload halaman
-
+  event.preventDefault();
   const btn = event.target.querySelector("button[type='submit']");
   const originalText = btn.innerHTML;
   btn.innerHTML = "⏳ Menyimpan...";
@@ -28,9 +28,8 @@ export async function saveRAB(event) {
       document.querySelectorAll("#bulan-wrapper input:checked")
     ).map(el => el.value);
 
-    // Validasi dasar
     if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah) {
-      alert("Harap isi semua kolom dan pilih minimal satu bulan.");
+      alert("Harap isi semua kolom dengan benar dan pilih minimal satu bulan.");
       btn.innerHTML = originalText;
       btn.disabled = false;
       return;
@@ -59,14 +58,63 @@ export async function saveRAB(event) {
     setTimeout(() => (window.location.href = "list.html"), 1500);
   } catch (error) {
     console.error("Gagal menyimpan data:", error);
-    showToast("❌ Gagal menyimpan data: " + error.message, true);
+    showToast("❌ Gagal menyimpan: " + error.message, true);
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
   }
 }
 
-// 🔔 Notifikasi elegan
+// === FUNGSI TAMPILKAN DATA DI LIST.HTML ===
+export async function loadRABList() {
+  const user = JSON.parse(localStorage.getItem("loginUser"));
+  if (!user) {
+    alert("Anda belum login.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  const adminDivisions = ["Direktur", "Wakil Direktur"];
+  const isAdmin = adminDivisions.includes(user.division);
+
+  try {
+    const snapshot = await get(child(ref(db), "rabapp/pengajuan"));
+    const tableBody = document.querySelector("#rabTable tbody");
+    tableBody.innerHTML = "";
+
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const entries = Object.values(data);
+
+      const filtered = isAdmin
+        ? entries
+        : entries.filter(item => item.division === user.division);
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">Belum ada pengajuan</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.item}</td>
+          <td>${item.jenis}</td>
+          <td>${item.bulan.join(", ")}</td>
+          <td>Rp ${item.total.toLocaleString("id-ID")}</td>
+          <td>${item.status}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } else {
+      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">Belum ada data</td></tr>`;
+    }
+  } catch (error) {
+    console.error("Gagal memuat data:", error);
+  }
+}
+
+// === FUNGSI NOTIFIKASI ===
 function showToast(message, isError = false) {
   const toast = document.createElement("div");
   toast.textContent = message;
