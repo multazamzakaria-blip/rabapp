@@ -1,0 +1,13 @@
+[
+  { "username": "multazam", "password": "123", "name": "Multazam", "division": "Direktur" },
+  { "username": "beny", "password": "123", "name": "Beny Arizona", "division": "Wakil Direktur" },
+  { "username": "dini", "password": "123", "name": "Dini Indriani", "division": "Supervisor" },
+  { "username": "dony", "password": "123", "name": "Dony Setiawan", "division": "Supervisor" },
+  { "username": "favian", "password": "123", "name": "Favian", "division": "Pengasuhan Putra" },
+  { "username": "evita", "password": "123", "name": "Evita", "division": "Pengasuhan Putri" },
+  { "username": "alzam", "password": "123", "name": "Alzam", "division": "Pengajaran Putra" },
+  { "username": "meilisa", "password": "123", "name": "Meilisa", "division": "Pengajaran Putri" },
+  { "username": "hendrik", "password": "123", "name": "Hendrik", "division": "Sarpras & Dapur" },
+  { "username": "khansa", "password": "123", "name": "Khansa", "division": "Kesehatan" },
+  { "username": "ghalih", "password": "123", "name": "Ghalih", "division": "FI Mart" }
+]
