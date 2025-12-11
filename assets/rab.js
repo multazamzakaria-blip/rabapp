@@ -6,7 +6,8 @@ import {
   push,
   set,
   get,
-  child
+  update,
+  remove,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -38,12 +39,13 @@ export async function saveRAB(event) {
   const item = document.getElementById("item").value.trim();
   const jenis = document.getElementById("jenis").value;
   const urgensi = document.getElementById("urgensi").value.trim();
+  const satuan = document.getElementById("satuan").value.trim();
   const harga = parseFloat(document.getElementById("harga").value);
   const jumlah = parseInt(document.getElementById("jumlah").value);
   const bulanSelect = document.getElementById("bulan");
   const bulanDipilih = Array.from(bulanSelect.selectedOptions).map(opt => opt.value);
 
-  if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah) {
+  if (!item || !jenis || bulanDipilih.length === 0 || !harga || !jumlah || !satuan) {
     alert("⚠️ Harap isi semua kolom dengan benar.");
     return;
   }
@@ -54,6 +56,7 @@ export async function saveRAB(event) {
     item,
     jenis,
     bulan: bulanDipilih,
+    satuan,
     urgensi,
     harga,
     jumlah,
@@ -76,11 +79,9 @@ export async function saveRAB(event) {
 }
 
 // ============================================================
-// ✅ TAMPILKAN DATA DI LIST.HTML
+// ✅ TAMPILKAN DATA + FITUR EDIT & HAPUS
 // ============================================================
 export async function loadRABList() {
-  console.log("🔄 Memuat daftar pengajuan...");
-
   const user = JSON.parse(localStorage.getItem("loginUser"));
   if (!user) {
     alert("Anda belum login!");
@@ -88,58 +89,89 @@ export async function loadRABList() {
     return;
   }
 
-  console.log("👤 User login:", user);
-
   const adminDivisions = ["Direktur", "Wakil Direktur"];
   const isAdmin = adminDivisions.includes(user.division);
 
   const tbody = document.querySelector("#rabTable tbody");
-  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
-    const dbRef = ref(db, "rabapp/pengajuan");
-    const snapshot = await get(dbRef);
-
+    const snapshot = await get(ref(db, "rabapp/pengajuan"));
     tbody.innerHTML = "";
 
     if (!snapshot.exists()) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
       return;
     }
 
     const data = snapshot.val();
-    console.log("📦 Data diterima:", data);
-
     const entries = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-
-    const filtered = isAdmin
-      ? entries
-      : entries.filter((item) => item.division === user.division);
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777;">Belum ada pengajuan untuk divisi Anda.</td></tr>`;
-      return;
-    }
+    const filtered = isAdmin ? entries : entries.filter(e => e.division === user.division);
 
     filtered.forEach((entry) => {
-      const bulanText = Array.isArray(entry.bulan)
-        ? entry.bulan.join(", ")
-        : entry.bulan || "-";
-
+      const bulanText = Array.isArray(entry.bulan) ? entry.bulan.join(", ") : entry.bulan || "-";
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
         <td>${entry.item}</td>
         <td>${entry.jenis}</td>
         <td>${bulanText}</td>
-        <td>Rp ${entry.total ? entry.total.toLocaleString("id-ID") : 0}</td>
-        <td>${entry.status || "Menunggu"}</td>
+        <td>${entry.satuan || "-"}</td>
+        <td>Rp ${entry.total?.toLocaleString("id-ID")}</td>
+        <td>
+          <span style="
+            background:${entry.status === 'Disetujui' ? '#22c55e' :
+                        entry.status === 'Ditolak' ? '#ef4444' : '#f59e0b'};
+            color:white;padding:4px 10px;border-radius:8px;font-size:13px;">
+            ${entry.status}
+          </span>
+        </td>
+        <td style="text-align:center;">
+          <button class="btn-edit" data-id="${entry.id}">✏️</button>
+          <button class="btn-del" data-id="${entry.id}">🗑️</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
 
-    console.log("✅ Data berhasil dimuat ke tabel.");
+    // === EVENT UNTUK EDIT ===
+    document.querySelectorAll(".btn-edit").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        const data = entries.find((x) => x.id === id);
+        if (!data) return;
+
+        const newNama = prompt("Edit nama item:", data.item);
+        const newHarga = prompt("Edit harga satuan:", data.harga);
+        const newJumlah = prompt("Edit jumlah:", data.jumlah);
+
+        if (newNama && newHarga && newJumlah) {
+          await update(ref(db, "rabapp/pengajuan/" + id), {
+            item: newNama,
+            harga: parseFloat(newHarga),
+            jumlah: parseInt(newJumlah),
+            total: parseFloat(newHarga) * parseInt(newJumlah)
+          });
+          alert("✅ Data berhasil diperbarui!");
+          loadRABList();
+        }
+      });
+    });
+
+    // === EVENT UNTUK HAPUS ===
+    document.querySelectorAll(".btn-del").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Yakin ingin menghapus item ini?")) {
+          await remove(ref(db, "rabapp/pengajuan/" + id));
+          alert("🗑️ Data berhasil dihapus!");
+          loadRABList();
+        }
+      });
+    });
+
   } catch (error) {
-    console.error("❌ Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#dc2626;">Gagal memuat data: ${error.message}</td></tr>`;
+    console.error("Gagal memuat data:", error);
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
