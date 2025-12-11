@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
 function getUser() {
   return JSON.parse(localStorage.getItem("loginUser"));
@@ -14,11 +14,15 @@ export function saveRAB(event) {
     return;
   }
 
-  // Ambil bulan multiple
-  const bulan = Array.from(document.getElementById("bulan").selectedOptions)
-                     .map(opt => opt.value);
+  // Ambil bulan dari checkbox
+  const bulan = Array.from(
+    document.querySelectorAll("#bulan-wrapper input[type='checkbox']:checked")
+  ).map(cb => cb.value);
 
-  const rabRef = ref(db, "rabapp/rab");
+  if (bulan.length === 0) {
+    alert("Pilih minimal satu bulan pelaksanaan.");
+    return;
+  }
 
   const data = {
     item: document.getElementById("item").value,
@@ -34,11 +38,12 @@ export function saveRAB(event) {
     createdAt: new Date().toISOString()
   };
 
+  const rabRef = ref(db, "rabapp/rab");
   const newRef = push(rabRef);
 
   set(newRef, data)
     .then(() => {
-      alert("Pengajuan berhasil disimpan.");
+      alert("Pengajuan berhasil disimpan!");
       window.location.href = "list.html";
     })
     .catch(err => {
