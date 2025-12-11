@@ -288,3 +288,14 @@ th {
     padding: 10px;
   }
 }
+.btn-edit, .btn-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0 5px;
+  transition: transform 0.1s ease;
+}
+
+.btn-edit:hover { color: #2563eb; transform: scale(1.2); }
+.btn-del:hover { color: #ef4444; transform: scale(1.2); }
