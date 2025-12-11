@@ -5,28 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard RAB</title>
   <link rel="stylesheet" href="assets/style.css">
+
+  <style>
+    /* PAGE WRAPPER */
+    .dashboard-wrapper {
+      max-width: 650px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    /* CARD UTAMA */
+    .dashboard-card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .dashboard-card:hover {
+      box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    #welcome {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f1f1f;
+      margin-bottom: 26px;
+    }
+
+    /* MENU BUTTONS */
+    .menu a {
+      display: block;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      background: #0b63ce;
+      text-decoration: none;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    .menu a:hover {
+      background: #084fa4;
+      transform: translateY(-1px);
+    }
+
+    /* ADMIN BUTTON */
+    #adminMenu {
+      background: #475569;
+    }
+
+    #adminMenu:hover {
+      background: #334155;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .dashboard-card {
+        padding: 26px;
+      }
+      #welcome {
+        font-size: 17px;
+      }
+    }
+  </style>
 </head>
 
 <body onload="checkLogin()">
 
+<!-- NAVBAR -->
 <div class="navbar">
-  <h2>Dashboard RAB</h2>
-  <button onclick="logout()">Keluar</button>
+  <h2 style="font-size: 20px; font-weight: 600;">Dashboard RAB</h2>
+  <button onclick="logout()" style="font-size: 15px;">Keluar</button>
 </div>
 
-<div class="container">
-  <h3 id="welcome"></h3>
+<!-- DASHBOARD CONTENT -->
+<div class="dashboard-wrapper">
+  <div class="dashboard-card">
 
-  <div class="menu">
-    <a href="form.html">+ Buat Pengajuan RAB</a>
-    <a href="list.html">📄 Daftar Pengajuan Saya</a>
+    <h3 id="welcome"></h3>
 
-    <!-- Hanya admin yang boleh melihat tombol ini -->
-    <a href="admin.html" id="adminMenu">🛠️ Rekap Admin</a>
+    <div class="menu">
+      <a href="form.html">➕ Buat Pengajuan RAB</a>
+      <a href="list.html">📄 Daftar Pengajuan Saya</a>
+
+      <!-- Hanya admin -->
+      <a href="admin.html" id="adminMenu">🛠️ Rekap Admin</a>
+    </div>
+
   </div>
 </div>
 
+<!-- SCRIPT LOGIN & ADMIN CHECK -->
 <script src="assets/auth.js"></script>
+
 <script>
   const user = JSON.parse(localStorage.getItem("loginUser"));
 
@@ -34,13 +112,13 @@
   document.getElementById("welcome").innerText =
     `Selamat datang, ${user.name} (${user.division})`;
 
-  // Divisi yang dianggap admin
+  // Divisi admin
   const adminDivisions = ["Direktur", "Wakil Direktur"];
 
-  // Tampilkan/hilangkan menu admin
+  // Sembunyikan menu admin jika bukan admin
   const adminMenu = document.getElementById("adminMenu");
   if (!adminDivisions.includes(user.division)) {
-    adminMenu.style.display = "none"; // sembunyikan
+    adminMenu.style.display = "none";
   }
 </script>
 
