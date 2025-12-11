@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { ref, push, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
 function getUser() {
   return JSON.parse(localStorage.getItem("loginUser"));
@@ -14,10 +14,10 @@ export function saveRAB(event) {
     return;
   }
 
-  // Ambil bulan dari checkbox
+  // Ambil bulan tercentang
   const bulan = Array.from(
     document.querySelectorAll("#bulan-wrapper input[type='checkbox']:checked")
-  ).map(cb => cb.value);
+  ).map(c => c.value);
 
   if (bulan.length === 0) {
     alert("Pilih minimal satu bulan pelaksanaan.");
@@ -39,9 +39,9 @@ export function saveRAB(event) {
   };
 
   const rabRef = ref(db, "rabapp/rab");
-  const newRef = push(rabRef);
+  const newEntry = push(rabRef);
 
-  set(newRef, data)
+  set(newEntry, data)
     .then(() => {
       alert("Pengajuan berhasil disimpan!");
       window.location.href = "list.html";
