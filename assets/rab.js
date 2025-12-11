@@ -15,7 +15,7 @@ const firebaseConfig = {
   projectId: "rabapp-520b5",
   storageBucket: "rabapp-520b5.firebasestorage.app",
   messagingSenderId: "1060443577862",
-  appId: "1:1060443577862:web:6618775410d09ae16cad87"
+  appId: "1:1060443577862:web:6618775410d09ae16cad87",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -46,22 +46,25 @@ export async function loadRABAdmin() {
   const editHarga = document.getElementById("editHarga");
   const editSatuan = document.getElementById("editSatuan");
   const editJumlah = document.getElementById("editJumlah");
+  const editUrgensi = document.getElementById("editUrgensi");
 
   let currentEditId = null;
 
-  tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
     const snapshot = await get(ref(db, "rabapp/pengajuan"));
     tbody.innerHTML = "";
 
     if (!snapshot.exists()) {
-      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada data.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#777;">Belum ada data.</td></tr>`;
       return;
     }
 
     const data = snapshot.val();
-    let acc = 0, pending = 0, reject = 0;
+    let acc = 0,
+      pending = 0,
+      reject = 0;
 
     Object.entries(data).forEach(([id, entry]) => {
       const bulanText = Array.isArray(entry.bulan)
@@ -82,6 +85,7 @@ export async function loadRABAdmin() {
       tr.innerHTML = `
         <td>${entry.item}</td>
         <td>${entry.jenis}</td>
+        <td>${entry.urgensi || "-"}</td>
         <td>${bulanText}</td>
         <td>Rp ${entry.harga?.toLocaleString("id-ID")}</td>
         <td>${entry.jumlah ?? "-"}</td>
@@ -142,6 +146,7 @@ export async function loadRABAdmin() {
         editHarga.value = entry.harga || "";
         editSatuan.value = entry.satuan || "";
         editJumlah.value = entry.jumlah || "";
+        editUrgensi.value = entry.urgensi || "";
 
         modal.style.display = "flex"; // buka modal
       });
@@ -155,6 +160,7 @@ export async function loadRABAdmin() {
       const newHarga = parseFloat(editHarga.value);
       const newSatuan = editSatuan.value.trim();
       const newJumlah = parseInt(editJumlah.value);
+      const newUrgensi = editUrgensi.value.trim();
 
       if (!newNama || !newHarga || !newJumlah) {
         alert("Lengkapi semua kolom!");
@@ -166,7 +172,8 @@ export async function loadRABAdmin() {
         harga: newHarga,
         satuan: newSatuan,
         jumlah: newJumlah,
-        total: newHarga * newJumlah
+        urgensi: newUrgensi,
+        total: newHarga * newJumlah,
       });
 
       modal.style.display = "none";
@@ -193,6 +200,6 @@ export async function loadRABAdmin() {
     });
   } catch (error) {
     console.error("Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
