@@ -13,7 +13,7 @@
   </div>
 
   <div class="container">
-    <form id="rabForm" onsubmit="saveRAB(event)">
+    <form id="rabForm">
       <input type="text" id="item" placeholder="Nama Program / Item" required>
 
       <select id="jenis" required>
@@ -38,11 +38,14 @@
       <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
       <input type="number" id="jumlah" placeholder="Jumlah" required>
 
-      <button type="submit">💾 Simpan Pengajuan</button>
+      <button id="saveBtn" type="submit">💾 Simpan Pengajuan</button>
     </form>
   </div>
 
   <script src="assets/auth.js"></script>
-  <script src="assets/rab.js"></script>
+  <script type="module">
+    import { saveRAB } from "./assets/rab.js";
+    document.getElementById("rabForm").addEventListener("submit", saveRAB);
+  </script>
 </body>
 </html>
