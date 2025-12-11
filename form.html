@@ -8,58 +8,62 @@
 </head>
 
 <body onload="checkLogin()">
-  <div class="navbar">
-    <a href="dashboard.html">⬅ Kembali</a>
-    <h2>Form Pengajuan RAB</h2>
+
+<div class="navbar">
+  <a href="dashboard.html">⬅ Kembali</a>
+  <h2>Form Pengajuan RAB</h2>
+</div>
+
+<div class="container">
+
+<form id="rabForm">
+
+  <input type="text" id="item" placeholder="Nama Program / Item" required>
+
+  <select id="jenis" required>
+    <option value="">-- Pilih Jenis --</option>
+    <option>Program Peningkatan Mutu SDM</option>
+    <option>Program Peningkatan Mutu Santri</option>
+    <option>Pengadaan Barang</option>
+    <option>Perbaikan Rutin</option>
+    <option>Bahan Makanan</option>
+    <option>Honorium SDM</option>
+    <option>Rapat dan Koordinasi Pengurus</option>
+  </select>
+
+  <label style="font-weight:bold; margin-top:15px;">Bulan Pelaksanaan (boleh pilih banyak):</label>
+
+  <!-- CHECKBOX BULAN -->
+  <div id="bulan-wrapper" class="bulan-checkbox">
+    <label><input type="checkbox" value="Januari"> Januari</label>
+    <label><input type="checkbox" value="Februari"> Februari</label>
+    <label><input type="checkbox" value="Maret"> Maret</label>
+    <label><input type="checkbox" value="April"> April</label>
+    <label><input type="checkbox" value="Mei"> Mei</label>
+    <label><input type="checkbox" value="Juni"> Juni</label>
+    <label><input type="checkbox" value="Juli"> Juli</label>
+    <label><input type="checkbox" value="Agustus"> Agustus</label>
+    <label><input type="checkbox" value="September"> September</label>
+    <label><input type="checkbox" value="Oktober"> Oktober</label>
+    <label><input type="checkbox" value="November"> November</label>
+    <label><input type="checkbox" value="Desember"> Desember</label>
   </div>
 
-  <div class="container">
-    <form id="rabForm">
-      <input type="text" id="item" placeholder="Nama Program / Item" required>
+  <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
+  <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
+  <input type="number" id="jumlah" placeholder="Jumlah" required>
 
-      <select id="jenis" required>
-        <option value="">-- Pilih Jenis --</option>
-        <option>Program Peningkatan Mutu SDM</option>
-        <option>Program Peningkatan Mutu Santri</option>
-        <option>Pengadaan Barang</option>
-        <option>Perbaikan Rutin</option>
-        <option>Bahan Makanan</option>
-        <option>Honorium SDM</option>
-        <option>Rapat dan Koordinasi Pengurus</option>
-      </select>
+  <button type="submit">💾 Simpan Pengajuan</button>
+</form>
 
-      <label style="margin-top:10px; font-weight:bold;">Bulan Pelaksanaan (bisa pilih banyak):</label>
-      <select id="bulan" multiple size="6" required>
-        <option>Januari</option>
-        <option>Februari</option>
-        <option>Maret</option>
-        <option>April</option>
-        <option>Mei</option>
-        <option>Juni</option>
-        <option>Juli</option>
-        <option>Agustus</option>
-        <option>September</option>
-        <option>Oktober</option>
-        <option>November</option>
-        <option>Desember</option>
-      </select>
+</div>
 
-      <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
-      <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
-      <input type="number" id="jumlah" placeholder="Jumlah" required>
+<script src="assets/auth.js"></script>
 
-      <button type="submit">💾 Simpan Pengajuan</button>
-    </form>
-  </div>
-
-  <script src="assets/auth.js"></script>
-
-  <!-- Import Module Firebase & rab.js -->
-  <script type="module">
-    import { saveRAB } from './assets/rab.js';
-
-    document.getElementById("rabForm").addEventListener("submit", saveRAB);
-  </script>
+<script type="module">
+  import { saveRAB } from './assets/rab.js';
+  document.getElementById('rabForm').addEventListener('submit', saveRAB);
+</script>
 
 </body>
 </html>
