@@ -18,18 +18,12 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 22px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .navbar a {
-      color: #fff;
+      color: white;
       text-decoration: none;
       font-weight: 500;
-    }
-
-    .navbar h2 {
-      font-size: 18px;
-      margin: 0;
     }
 
     .container {
@@ -51,16 +45,13 @@
       background: #0b63ce;
       color: white;
       text-align: left;
-      padding: 12px 10px;
-      font-size: 15px;
-      white-space: nowrap;
+      padding: 12px;
     }
 
     td {
       border-bottom: 1px solid #e5e7eb;
-      padding: 12px 10px;
+      padding: 10px;
       font-size: 14px;
-      vertical-align: top;
     }
 
     tr:hover {
@@ -69,50 +60,42 @@
 
     .status {
       display: inline-block;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 8px;
       color: white;
       font-size: 13px;
-      text-align: center;
     }
 
     .status-menunggu { background: #f59e0b; }
     .status-ditolak { background: #ef4444; }
     .status-disetujui { background: #22c55e; }
 
-    .btn-edit, .btn-del {
-      background: none;
+    .btn-del {
+      background: #6b7280;
       border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
-      margin: 0 5px;
-      transition: transform 0.1s ease;
     }
 
-    .btn-edit:hover { color: #2563eb; transform: scale(1.2); }
-    .btn-del:hover { color: #ef4444; transform: scale(1.2); }
-
-    @media (max-width: 700px) {
-      th, td {
-        font-size: 13px;
-        padding: 8px;
-      }
-    }
+    .btn-del:hover { opacity: 0.8; }
   </style>
 </head>
 
 <body>
   <div class="navbar">
     <a href="dashboard.html">⬅ Kembali</a>
-    <h2>Daftar Pengajuan RAB</h2>
+    <h3>Daftar Pengajuan RAB</h3>
   </div>
 
   <div class="container">
-    <table id="rabTable">
+    <table id="rabUserTable">
       <thead>
         <tr>
           <th>Nama Item</th>
           <th>Jenis</th>
+          <th>Urgensi</th>
           <th>Bulan</th>
           <th>Harga Satuan</th>
           <th>Satuan</th>
@@ -126,11 +109,102 @@
     </table>
   </div>
 
-  <script src="assets/auth.js"></script>
-
   <script type="module">
-    import { loadRABList } from "./assets/rab.js";
-    loadRABList();
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_kvyDshMXYNqj87bqXZC8tKAi_Kko2Rs",
+      authDomain: "rabapp-520b5.firebaseapp.com",
+      databaseURL: "https://rabapp-520b5-default-rtdb.firebaseio.com",
+      projectId: "rabapp-520b5",
+      storageBucket: "rabapp-520b5.firebasestorage.app",
+      messagingSenderId: "1060443577862",
+      appId: "1:1060443577862:web:6618775410d09ae16cad87",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const tbody = document.querySelector("#rabUserTable tbody");
+    const user = JSON.parse(localStorage.getItem("loginUser"));
+
+    if (!user) {
+      alert("Silakan login dulu!");
+      window.location.href = "index.html";
+    }
+
+    async function loadUserRAB() {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+      try {
+        const snapshot = await get(ref(db, "rabapp/pengajuan"));
+        tbody.innerHTML = "";
+
+        if (!snapshot.exists()) {
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada pengajuan.</td></tr>`;
+          return;
+        }
+
+        const data = snapshot.val();
+        let found = false;
+
+        Object.entries(data).forEach(([id, entry]) => {
+          if (entry.username !== user.username) return; // hanya tampilkan milik user login
+          found = true;
+
+          const bulanText = Array.isArray(entry.bulan)
+            ? entry.bulan.join(", ")
+            : entry.bulan || "-";
+          const total = entry.total || 0;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${entry.item}</td>
+            <td>${entry.jenis}</td>
+            <td>${entry.urgensi || "-"}</td>
+            <td>${bulanText}</td>
+            <td>Rp ${entry.harga?.toLocaleString("id-ID")}</td>
+            <td>${entry.satuan || "-"}</td>
+            <td>${entry.jumlah ?? "-"}</td>
+            <td>Rp ${total.toLocaleString("id-ID")}</td>
+            <td>
+              <span class="status ${
+                entry.status === "Disetujui"
+                  ? "status-disetujui"
+                  : entry.status === "Ditolak"
+                  ? "status-ditolak"
+                  : "status-menunggu"
+              }">${entry.status}</span>
+            </td>
+            <td>
+              <button class="btn-del" data-id="${id}">🗑️ Hapus</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        if (!found) {
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada pengajuan dari akun Anda.</td></tr>`;
+        }
+
+        // Tombol hapus
+        document.querySelectorAll(".btn-del").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            const id = e.target.dataset.id;
+            if (confirm("Yakin ingin menghapus pengajuan ini?")) {
+              await remove(ref(db, "rabapp/pengajuan/" + id));
+              alert("🗑️ Data berhasil dihapus!");
+              loadUserRAB();
+            }
+          });
+        });
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#dc2626;">Gagal memuat data.</td></tr>`;
+      }
+    }
+
+    loadUserRAB();
   </script>
 </body>
 </html>
