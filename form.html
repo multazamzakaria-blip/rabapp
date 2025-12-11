@@ -5,64 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css">
+
+  <style>
+    /* PAGE WRAPPER */
+    .page-wrapper {
+      max-width: 650px;
+      margin: 45px auto;
+      padding: 0 22px;
+    }
+
+    /* CARD */
+    .form-card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 18px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      transition: 0.25s ease;
+    }
+
+    .form-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.09);
+    }
+
+    h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 22px;
+      font-weight: 600;
+    }
+
+    label {
+      margin-top: 18px;
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: #222;
+    }
+
+  </style>
+
 </head>
 
 <body onload="checkLogin()">
 
+<!-- NAVBAR -->
 <div class="navbar">
-  <a href="dashboard.html">⬅ Kembali</a>
-  <h2>Form Pengajuan RAB</h2>
+  <a href="dashboard.html" style="font-size:15px;">⬅ Kembali</a>
+  <h2 style="font-size:20px;">Form Pengajuan RAB</h2>
 </div>
 
-<div class="container">
+<!-- FORM CARD -->
+<div class="page-wrapper">
+  <div class="form-card">
 
-<form id="rabForm">
+    <form id="rabForm">
 
-  <input type="text" id="item" placeholder="Nama Program / Item" required>
+      <!-- ITEM -->
+      <input type="text" id="item" placeholder="Nama Program / Item" required>
 
-  <select id="jenis" required>
-    <option value="">-- Pilih Jenis --</option>
-    <option>Program Peningkatan Mutu SDM</option>
-    <option>Program Peningkatan Mutu Santri</option>
-    <option>Pengadaan Barang</option>
-    <option>Perbaikan Rutin</option>
-    <option>Bahan Makanan</option>
-    <option>Honorium SDM</option>
-    <option>Rapat dan Koordinasi Pengurus</option>
-  </select>
+      <!-- JENIS -->
+      <select id="jenis" required>
+        <option value="">-- Pilih Jenis --</option>
+        <option>Program Peningkatan Mutu SDM</option>
+        <option>Program Peningkatan Mutu Santri</option>
+        <option>Pengadaan Barang</option>
+        <option>Perbaikan Rutin</option>
+        <option>Bahan Makanan</option>
+        <option>Honorium SDM</option>
+        <option>Rapat dan Koordinasi Pengurus</option>
+      </select>
 
-  <label style="font-weight:bold; margin-top:15px;">Bulan Pelaksanaan (boleh pilih banyak):</label>
+      <!-- BULAN -->
+      <label>Bulan Pelaksanaan (boleh pilih banyak):</label>
+      <div id="bulan-wrapper" class="bulan-checkbox">
+        <label><input type="checkbox" value="Januari"> Januari</label>
+        <label><input type="checkbox" value="Februari"> Februari</label>
+        <label><input type="checkbox" value="Maret"> Maret</label>
+        <label><input type="checkbox" value="April"> April</label>
+        <label><input type="checkbox" value="Mei"> Mei</label>
+        <label><input type="checkbox" value="Juni"> Juni</label>
+        <label><input type="checkbox" value="Juli"> Juli</label>
+        <label><input type="checkbox" value="Agustus"> Agustus</label>
+        <label><input type="checkbox" value="September"> September</label>
+        <label><input type="checkbox" value="Oktober"> Oktober</label>
+        <label><input type="checkbox" value="November"> November</label>
+        <label><input type="checkbox" value="Desember"> Desember</label>
+      </div>
 
-  <!-- CHECKBOX BULAN -->
-  <div id="bulan-wrapper" class="bulan-checkbox">
-    <label><input type="checkbox" value="Januari"> Januari</label>
-    <label><input type="checkbox" value="Februari"> Februari</label>
-    <label><input type="checkbox" value="Maret"> Maret</label>
-    <label><input type="checkbox" value="April"> April</label>
-    <label><input type="checkbox" value="Mei"> Mei</label>
-    <label><input type="checkbox" value="Juni"> Juni</label>
-    <label><input type="checkbox" value="Juli"> Juli</label>
-    <label><input type="checkbox" value="Agustus"> Agustus</label>
-    <label><input type="checkbox" value="September"> September</label>
-    <label><input type="checkbox" value="Oktober"> Oktober</label>
-    <label><input type="checkbox" value="November"> November</label>
-    <label><input type="checkbox" value="Desember"> Desember</label>
+      <!-- URGENSI -->
+      <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
+
+      <!-- HARGA -->
+      <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
+
+      <!-- JUMLAH -->
+      <input type="number" id="jumlah" placeholder="Jumlah" required>
+
+      <!-- BUTTON -->
+      <button type="submit">💾 Simpan Pengajuan</button>
+
+    </form>
+
   </div>
-
-  <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
-  <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
-  <input type="number" id="jumlah" placeholder="Jumlah" required>
-
-  <button type="submit">💾 Simpan Pengajuan</button>
-</form>
-
 </div>
 
 <script src="assets/auth.js"></script>
 
+<!-- PENTING: MODULE FIREBASE HARUS RELATIF KE ROOT GITHUB PAGES -->
 <script type="module">
-  import { saveRAB } from './assets/rab.js';
-  document.getElementById('rabForm').addEventListener('submit', saveRAB);
+  import { saveRAB } from "./assets/rab.js";
+  document.getElementById("rabForm").addEventListener("submit", saveRAB);
 </script>
 
 </body>
