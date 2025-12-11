@@ -6,6 +6,7 @@ import {
   get,
   update,
   remove,
+  push,        // <-- dipakai untuk simpan data baru
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -20,6 +21,74 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// ============================================================
+// ✅ SIMPAN DATA RAB (dipakai di form.html)
+// ============================================================
+export async function saveRAB(e) {
+  e.preventDefault();
+
+  const user = JSON.parse(localStorage.getItem("loginUser"));
+  if (!user) {
+    alert("Anda belum login!");
+    window.location.href = "index.html";
+    return;
+  }
+
+  const item = document.getElementById("item").value.trim();
+  const jenis = document.getElementById("jenis").value;
+  const urgensi = document.getElementById("urgensi").value.trim();
+  const satuan = document.getElementById("satuan").value.trim();
+  const hargaVal = document.getElementById("harga").value;
+  const jumlahVal = document.getElementById("jumlah").value;
+
+  const bulan = [...document.querySelectorAll("#bulan-wrapper input:checked")].map(
+    (i) => i.value
+  );
+
+  const harga = parseFloat(hargaVal);
+  const jumlah = parseInt(jumlahVal);
+  const total = harga * jumlah;
+
+  if (!item || !jenis || !urgensi || !satuan || !bulan.length) {
+    alert("Mohon lengkapi semua kolom, termasuk bulan dan urgensi.");
+    return;
+  }
+  if (isNaN(harga) || isNaN(jumlah) || harga <= 0 || jumlah <= 0) {
+    alert("Harga dan jumlah harus berupa angka lebih dari 0.");
+    return;
+  }
+
+  try {
+    await push(ref(db, "rabapp/pengajuan"), {
+      item,
+      jenis,
+      urgensi,
+      bulan,     // array bulan
+      satuan,
+      harga,
+      jumlah,
+      total,
+      status: "Menunggu",
+      createdAt: new Date().toISOString(),
+
+      // informasi pemilik data
+      username: user.username,                    // dipakai di list.html
+      createdBy: user.name || user.fullname || user.username,
+      division: user.division || "-",
+    });
+
+    alert("✅ Pengajuan berhasil disimpan!");
+
+    // reset form
+    e.target.reset();
+    const selectedText = document.getElementById("selectedText");
+    if (selectedText) selectedText.innerText = "Pilih Bulan";
+  } catch (error) {
+    console.error("Gagal menyimpan:", error);
+    alert("❌ Terjadi kesalahan saat menyimpan data.");
+  }
+}
 
 // ============================================================
 // ✅ ADMIN: LIHAT, SETUJUI / TOLAK / EDIT / HAPUS PENGAJUAN
@@ -58,6 +127,9 @@ export async function loadRABAdmin() {
 
     if (!snapshot.exists()) {
       tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#777;">Belum ada data.</td></tr>`;
+      totalAcc.innerText = "Rp 0";
+      totalPending.innerText = "Rp 0";
+      totalReject.innerText = "Rp 0";
       return;
     }
 
@@ -162,8 +234,8 @@ export async function loadRABAdmin() {
       const newJumlah = parseInt(editJumlah.value);
       const newUrgensi = editUrgensi.value.trim();
 
-      if (!newNama || !newHarga || !newJumlah) {
-        alert("Lengkapi semua kolom!");
+      if (!newNama || isNaN(newHarga) || isNaN(newJumlah)) {
+        alert("Lengkapi semua kolom dengan benar!");
         return;
       }
 
