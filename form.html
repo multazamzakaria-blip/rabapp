@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Pengajuan RAB</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body onload="checkLogin()">
+  <div class="navbar">
+    <a href="dashboard.html">⬅ Kembali</a>
+    <h2>Form Pengajuan RAB</h2>
+  </div>
+
+  <div class="container">
+    <form id="rabForm" onsubmit="saveRAB(event)">
+      <input type="text" id="item" placeholder="Nama Program / Item" required>
+
+      <select id="jenis" required>
+        <option value="">-- Pilih Jenis --</option>
+        <option>Program</option>
+        <option>Perbaikan Rutin</option>
+        <option>Pengadaan Barang</option>
+        <option>Hadiah & Tunjangan SDM</option>
+        <option>Pengadaan Makan/Minum</option>
+      </select>
+
+      <select id="bulan" required>
+        <option value="">-- Bulan Pelaksanaan --</option>
+        <option>Januari</option><option>Februari</option><option>Maret</option>
+        <option>April</option><option>Mei</option><option>Juni</option>
+        <option>Juli</option><option>Agustus</option><option>September</option>
+        <option>Oktober</option><option>November</option><option>Desember</option>
+      </select>
+
+      <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
+
+      <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
+      <input type="number" id="jumlah" placeholder="Jumlah" required>
+
+      <button type="submit">💾 Simpan Pengajuan</button>
+    </form>
+  </div>
+
+  <script src="assets/auth.js"></script>
+  <script src="assets/rab.js"></script>
+</body>
+</html>
