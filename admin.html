@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rekap Admin - Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css" />
-
   <style>
     body {
       font-family: "Poppins", sans-serif;
@@ -100,13 +99,61 @@
       transition: 0.2s;
     }
 
-    .btn-aksi:hover {
-      opacity: 0.8;
+    .btn-aksi:hover { opacity: 0.8; }
+    td:last-child { text-align: center; }
+
+    /* ========== MODAL ========== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
     }
 
-    td:last-child {
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      width: 380px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #0b63ce;
       text-align: center;
     }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+    }
+
+    .modal-content button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save { background: #0b63ce; }
+    .btn-close { background: #6b7280; margin-top: 6px; }
   </style>
 </head>
 
@@ -139,6 +186,19 @@
       </thead>
       <tbody></tbody>
     </table>
+  </div>
+
+  <!-- Modal Edit -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Data Pengajuan</h3>
+      <input type="text" id="editNama" placeholder="Nama Item" />
+      <input type="number" id="editHarga" placeholder="Harga Satuan (Rp)" />
+      <input type="text" id="editSatuan" placeholder="Satuan (pcs/unit/paket)" />
+      <input type="number" id="editJumlah" placeholder="Jumlah" />
+      <button class="btn-save" id="btnSaveEdit">💾 Simpan Perubahan</button>
+      <button class="btn-close" id="btnCloseEdit">Tutup</button>
+    </div>
   </div>
 
   <script src="assets/auth.js"></script>
