@@ -161,6 +161,7 @@
 
         if (!snapshot.exists()) {
           tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Belum ada pengajuan.</td></tr>`;
+          totalAll.innerText = "Rp 0";
           return;
         }
 
@@ -169,7 +170,14 @@
         let hasData = false;
 
         Object.entries(data).forEach(([id, entry]) => {
-          if (entry.username !== user.username) return;
+          // ==== FILTER DATA MILIK USER ====
+          const sameUser =
+            entry.username === user.username ||
+            entry.createdBy === user.username ||
+            entry.createdBy === user.name ||
+            entry.createdBy === user.fullname;
+
+          if (!sameUser) return;
 
           hasData = true;
           const bulanText = Array.isArray(entry.bulan)
