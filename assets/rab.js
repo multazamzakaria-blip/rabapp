@@ -38,14 +38,14 @@ export async function loadRABList() {
   const isAdmin = adminDivisions.includes(user.division);
 
   const tbody = document.querySelector("#rabTable tbody");
-  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#555;">⏳ Memuat data...</td></tr>`;
 
   try {
     const snapshot = await get(ref(db, "rabapp/pengajuan"));
     tbody.innerHTML = "";
 
     if (!snapshot.exists()) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#777;">Belum ada data pengajuan.</td></tr>`;
       return;
     }
 
@@ -62,6 +62,7 @@ export async function loadRABList() {
         <td>${entry.jenis}</td>
         <td>${bulanText}</td>
         <td>Rp ${entry.harga?.toLocaleString("id-ID")}</td>
+        <td>${entry.satuan || "-"}</td>
         <td>${entry.jumlah}</td>
         <td>Rp ${entry.total?.toLocaleString("id-ID")}</td>
         <td>
@@ -90,12 +91,14 @@ export async function loadRABList() {
 
         const newNama = prompt("Edit nama item:", data.item);
         const newHarga = prompt("Edit harga satuan:", data.harga);
+        const newSatuan = prompt("Edit satuan (pcs/unit/paket):", data.satuan);
         const newJumlah = prompt("Edit jumlah:", data.jumlah);
 
-        if (newNama && newHarga && newJumlah) {
+        if (newNama && newHarga && newJumlah && newSatuan) {
           await update(ref(db, "rabapp/pengajuan/" + id), {
             item: newNama,
             harga: parseFloat(newHarga),
+            satuan: newSatuan,
             jumlah: parseInt(newJumlah),
             total: parseFloat(newHarga) * parseInt(newJumlah)
           });
@@ -119,9 +122,10 @@ export async function loadRABList() {
 
   } catch (error) {
     console.error("Gagal memuat data:", error);
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;">Gagal memuat data. Lihat console log.</td></tr>`;
   }
 }
+
 
 
 
