@@ -6,6 +6,7 @@
   <title>Form Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
+
 <body onload="checkLogin()">
   <div class="navbar">
     <a href="dashboard.html">⬅ Kembali</a>
@@ -18,34 +19,47 @@
 
       <select id="jenis" required>
         <option value="">-- Pilih Jenis --</option>
-        <option>Program</option>
-        <option>Perbaikan Rutin</option>
+        <option>Program Peningkatan Mutu SDM</option>
+        <option>Program Peningkatan Mutu Santri</option>
         <option>Pengadaan Barang</option>
-        <option>Hadiah & Tunjangan SDM</option>
-        <option>Pengadaan Makan/Minum</option>
+        <option>Perbaikan Rutin</option>
+        <option>Bahan Makanan</option>
+        <option>Honorium SDM</option>
+        <option>Rapat dan Koordinasi Pengurus</option>
       </select>
 
-      <select id="bulan" required>
-        <option value="">-- Bulan Pelaksanaan --</option>
-        <option>Januari</option><option>Februari</option><option>Maret</option>
-        <option>April</option><option>Mei</option><option>Juni</option>
-        <option>Juli</option><option>Agustus</option><option>September</option>
-        <option>Oktober</option><option>November</option><option>Desember</option>
+      <label style="margin-top:10px; font-weight:bold;">Bulan Pelaksanaan (bisa pilih banyak):</label>
+      <select id="bulan" multiple size="6" required>
+        <option>Januari</option>
+        <option>Februari</option>
+        <option>Maret</option>
+        <option>April</option>
+        <option>Mei</option>
+        <option>Juni</option>
+        <option>Juli</option>
+        <option>Agustus</option>
+        <option>September</option>
+        <option>Oktober</option>
+        <option>November</option>
+        <option>Desember</option>
       </select>
 
       <textarea id="urgensi" placeholder="Mengapa penting item ini?" required></textarea>
-
       <input type="number" id="harga" placeholder="Harga Satuan (Rp)" required>
       <input type="number" id="jumlah" placeholder="Jumlah" required>
 
-      <button id="saveBtn" type="submit">💾 Simpan Pengajuan</button>
+      <button type="submit">💾 Simpan Pengajuan</button>
     </form>
   </div>
 
   <script src="assets/auth.js"></script>
+
+  <!-- Import Module Firebase & rab.js -->
   <script type="module">
-    import { saveRAB } from "./assets/rab.js";
+    import { saveRAB } from './assets/rab.js';
+
     document.getElementById("rabForm").addEventListener("submit", saveRAB);
   </script>
+
 </body>
 </html>
