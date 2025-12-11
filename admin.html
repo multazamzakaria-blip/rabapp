@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rekap Admin - Pengajuan RAB</title>
   <link rel="stylesheet" href="assets/style.css" />
-
-  <!-- Tambahan Library untuk Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -15,7 +13,6 @@
       font-family: "Poppins", sans-serif;
       background: #f8fafc;
     }
-
     .navbar {
       background: #0b63ce;
       color: white;
@@ -23,15 +20,12 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 22px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .navbar a {
-      color: #fff;
+      color: white;
       text-decoration: none;
       font-weight: 500;
     }
-
     .container {
       max-width: 1250px;
       margin: 40px auto;
@@ -41,7 +35,6 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
       overflow-x: auto;
     }
-
     .summary-box {
       background: #e0f2fe;
       padding: 15px 20px;
@@ -50,8 +43,6 @@
       color: #0b63ce;
       font-weight: 600;
     }
-
-    /* Filter bar */
     .filter-bar {
       display: flex;
       flex-wrap: wrap;
@@ -59,48 +50,37 @@
       margin-bottom: 15px;
       align-items: center;
     }
-
     select, button.export-btn {
       padding: 8px 12px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 14px;
     }
-
     button.export-btn {
       cursor: pointer;
       background: #0b63ce;
       color: white;
       border: none;
     }
-
     button.export-btn:hover {
       background: #094fa3;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
     }
-
     th {
       background: #0b63ce;
       color: white;
       text-align: left;
       padding: 12px 10px;
       font-size: 15px;
-      white-space: nowrap;
     }
-
     td {
       border-bottom: 1px solid #e5e7eb;
       padding: 10px;
       font-size: 14px;
-      vertical-align: top;
     }
-
-    tr:hover { background: #f9fbff; }
-
     .status {
       display: inline-block;
       padding: 6px 12px;
@@ -109,11 +89,9 @@
       font-size: 13px;
       text-align: center;
     }
-
     .status-menunggu { background: #f59e0b; }
     .status-ditolak { background: #ef4444; }
     .status-disetujui { background: #22c55e; }
-
     .btn-aksi {
       border: none;
       padding: 6px 10px;
@@ -123,8 +101,38 @@
       cursor: pointer;
       transition: 0.2s;
     }
-
-    .btn-aksi:hover { opacity: 0.85; }
+    .btn-edit { background:#2563eb; }
+    .btn-del { background:#6b7280; }
+    .btn-aksi:hover { opacity:0.85; }
+    td:last-child { text-align:center; }
+    /* MODAL */
+    .modal {
+      display:none;
+      position:fixed;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,0.5);
+      justify-content:center;
+      align-items:center;
+      z-index:100;
+    }
+    .modal-content {
+      background:white;
+      border-radius:12px;
+      padding:25px;
+      width:400px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    }
+    .modal-content input, .modal-content textarea {
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border:1px solid #d1d5db;
+      border-radius:8px;
+      font-family:inherit;
+      font-size:14px;
+    }
+    .btn-save { background:#0b63ce;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px; }
+    .btn-close { background:#6b7280;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:8px; }
   </style>
 </head>
 
@@ -141,7 +149,6 @@
       Ditolak: <span id="totalReject">Rp 0</span>
     </div>
 
-    <!-- FILTER BAR -->
     <div class="filter-bar">
       <select id="filterBulan">
         <option value="">Filter Bulan</option>
@@ -150,16 +157,12 @@
         <option>Juli</option><option>Agustus</option><option>September</option>
         <option>Oktober</option><option>November</option><option>Desember</option>
       </select>
-
       <select id="filterDivisi">
         <option value="">Filter Divisi</option>
         <option>Direktur</option>
         <option>Pengasuhan Putra</option>
-        <option>Pengasuhan Putri</option>
         <option>Pengajaran Putra</option>
-        <option>Pengajaran Putri</option>
       </select>
-
       <select id="filterJenis">
         <option value="">Filter Jenis Program</option>
         <option>Program Peningkatan Mutu SDM</option>
@@ -167,7 +170,6 @@
         <option>Pengadaan Barang</option>
         <option>Honorium SDM</option>
       </select>
-
       <button class="export-btn" id="btnExportPDF">📄 Export PDF</button>
       <button class="export-btn" id="btnExportExcel">📊 Export Excel</button>
     </div>
@@ -191,6 +193,20 @@
     </table>
   </div>
 
+  <!-- MODAL EDIT -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Pengajuan</h3>
+      <input type="text" id="editNama" placeholder="Nama Item" />
+      <input type="number" id="editHarga" placeholder="Harga Satuan (Rp)" />
+      <input type="number" id="editJumlah" placeholder="Jumlah" />
+      <input type="text" id="editDivisi" placeholder="Divisi" />
+      <textarea id="editUrgensi" placeholder="Uraian urgensi"></textarea>
+      <button class="btn-save" id="btnSaveEdit">💾 Simpan Perubahan</button>
+      <button class="btn-close" id="btnCloseEdit">Tutup</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
     import { getDatabase, ref, get, update, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
@@ -204,7 +220,6 @@
       messagingSenderId: "1060443577862",
       appId: "1:1060443577862:web:6618775410d09ae16cad87",
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
@@ -212,7 +227,10 @@
     const totalAcc = document.getElementById("totalAcc");
     const totalPending = document.getElementById("totalPending");
     const totalReject = document.getElementById("totalReject");
-
+    const modal = document.getElementById("editModal");
+    const btnSaveEdit = document.getElementById("btnSaveEdit");
+    const btnCloseEdit = document.getElementById("btnCloseEdit");
+    let currentEditId = null;
     let allData = {};
 
     async function loadRABAdmin() {
@@ -222,7 +240,6 @@
         tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Belum ada data.</td></tr>`;
         return;
       }
-
       allData = snapshot.val();
       renderTable(Object.entries(allData));
     }
@@ -230,13 +247,11 @@
     function renderTable(entries) {
       tbody.innerHTML = "";
       let acc = 0, pending = 0, reject = 0;
-
       entries.forEach(([id, entry]) => {
         const bulanText = Array.isArray(entry.bulan)
           ? entry.bulan.join(", ")
           : entry.bulan || "-";
         const total = entry.total || 0;
-
         if (entry.status === "Disetujui") acc += total;
         else if (entry.status === "Menunggu") pending += total;
         else if (entry.status === "Ditolak") reject += total;
@@ -258,92 +273,105 @@
               ? "status-ditolak"
               : "status-menunggu"
           }">${entry.status}</span></td>
-          <td>
-            <button class="btn-aksi" style="background:#22c55e;" onclick="updateStatus('${id}','Disetujui')">✔ Setujui</button>
-            <button class="btn-aksi" style="background:#ef4444;" onclick="updateStatus('${id}','Ditolak')">✖ Tolak</button>
+          <td style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+            <button class="btn-aksi" style="background:#22c55e;" onclick="updateStatus('${id}','Disetujui')">✔</button>
+            <button class="btn-aksi" style="background:#ef4444;" onclick="updateStatus('${id}','Ditolak')">✖</button>
+            <button class="btn-edit" data-id="${id}">✏️</button>
+            <button class="btn-del" data-id="${id}">🗑️</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
-
       totalAcc.textContent = "Rp " + acc.toLocaleString("id-ID");
       totalPending.textContent = "Rp " + pending.toLocaleString("id-ID");
       totalReject.textContent = "Rp " + reject.toLocaleString("id-ID");
+
+      document.querySelectorAll(".btn-del").forEach(btn=>{
+        btn.onclick=async(e)=>{
+          const id=e.target.dataset.id;
+          if(confirm("Hapus data ini?")){
+            await remove(ref(db,"rabapp/pengajuan/"+id));
+            alert("Data berhasil dihapus!");
+            loadRABAdmin();
+          }
+        };
+      });
+
+      document.querySelectorAll(".btn-edit").forEach(btn=>{
+        btn.onclick=(e)=>{
+          const id=e.target.dataset.id;
+          const entry=allData[id];
+          if(!entry)return;
+          currentEditId=id;
+          document.getElementById("editNama").value=entry.item||"";
+          document.getElementById("editHarga").value=entry.harga||"";
+          document.getElementById("editJumlah").value=entry.jumlah||"";
+          document.getElementById("editDivisi").value=entry.division||"";
+          document.getElementById("editUrgensi").value=entry.urgensi||"";
+          modal.style.display="flex";
+        };
+      });
     }
 
-    // ===== FILTER =====
-    document.querySelectorAll("#filterBulan, #filterDivisi, #filterJenis").forEach(sel => {
-      sel.addEventListener("change", () => {
-        const bulan = document.getElementById("filterBulan").value;
-        const divisi = document.getElementById("filterDivisi").value;
-        const jenis = document.getElementById("filterJenis").value;
+    btnSaveEdit.onclick=async()=>{
+      if(!currentEditId)return;
+      const newNama=document.getElementById("editNama").value.trim();
+      const newHarga=parseFloat(document.getElementById("editHarga").value);
+      const newJumlah=parseInt(document.getElementById("editJumlah").value);
+      const newDiv=document.getElementById("editDivisi").value.trim();
+      const newUrg=document.getElementById("editUrgensi").value.trim();
+      if(!newNama||isNaN(newHarga)||isNaN(newJumlah)){
+        alert("Lengkapi semua kolom!");
+        return;
+      }
+      await update(ref(db,"rabapp/pengajuan/"+currentEditId),{
+        item:newNama,harga:newHarga,jumlah:newJumlah,division:newDiv,urgensi:newUrg,total:newHarga*newJumlah
+      });
+      alert("✅ Data berhasil diperbarui!");
+      modal.style.display="none";
+      loadRABAdmin();
+    };
+    btnCloseEdit.onclick=()=>modal.style.display="none";
+    window.onclick=e=>{if(e.target===modal)modal.style.display="none";};
 
-        const filtered = Object.entries(allData).filter(([_, entry]) => {
-          const matchBulan = !bulan || (Array.isArray(entry.bulan) ? entry.bulan.includes(bulan) : entry.bulan === bulan);
-          const matchDivisi = !divisi || entry.division === divisi;
-          const matchJenis = !jenis || entry.jenis === jenis;
-          return matchBulan && matchDivisi && matchJenis;
+    window.updateStatus=async(id,status)=>{
+      await update(ref(db,"rabapp/pengajuan/"+id),{status});
+      loadRABAdmin();
+    };
+
+    // Filter dan Export sama seperti sebelumnya
+    document.querySelectorAll("#filterBulan,#filterDivisi,#filterJenis").forEach(sel=>{
+      sel.addEventListener("change",()=>{
+        const b=document.getElementById("filterBulan").value;
+        const d=document.getElementById("filterDivisi").value;
+        const j=document.getElementById("filterJenis").value;
+        const filtered=Object.entries(allData).filter(([_,e])=>{
+          const mB=!b||(Array.isArray(e.bulan)?e.bulan.includes(b):e.bulan===b);
+          const mD=!d||e.division===d;
+          const mJ=!j||e.jenis===j;
+          return mB&&mD&&mJ;
         });
-
         renderTable(filtered);
       });
     });
 
-    // ===== EXPORT PDF =====
-    document.getElementById("btnExportPDF").addEventListener("click", () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: "landscape" });
-      doc.text("Laporan Rekap Pengajuan RAB", 14, 15);
-
-      let rows = [["Nama Item","Jenis","Bulan","Harga","Jumlah","Total","Divisi","Status"]];
-      Object.values(allData).forEach(e => {
-        rows.push([
-          e.item,
-          e.jenis,
-          Array.isArray(e.bulan)?e.bulan.join(", "):e.bulan,
-          "Rp "+(e.harga||0).toLocaleString("id-ID"),
-          e.jumlah,
-          "Rp "+(e.total||0).toLocaleString("id-ID"),
-          e.division||"-",
-          e.status
-        ]);
+    document.getElementById("btnExportPDF").onclick=()=>{
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF({orientation:"landscape"});
+      doc.text("Laporan Rekap Pengajuan RAB",14,15);
+      let rows=[["Item","Jenis","Bulan","Harga","Jumlah","Total","Divisi","Status"]];
+      Object.values(allData).forEach(e=>{
+        rows.push([e.item,e.jenis,e.bulan,e.harga,e.jumlah,e.total,e.division,e.status]);
       });
-
-      let y = 25;
-      rows.forEach(r => {
-        doc.text(r.join(" | "), 10, y);
-        y += 8;
-      });
-
-      doc.save("rekap_pengajuan_RAB.pdf");
-    });
-
-    // ===== EXPORT EXCEL =====
-    document.getElementById("btnExportExcel").addEventListener("click", () => {
-      const wb = XLSX.utils.book_new();
-      const wsData = [["Nama Item","Jenis","Bulan","Harga","Jumlah","Total","Divisi","Status"]];
-      Object.values(allData).forEach(e => {
-        wsData.push([
-          e.item,
-          e.jenis,
-          Array.isArray(e.bulan)?e.bulan.join(", "):e.bulan,
-          e.harga,
-          e.jumlah,
-          e.total,
-          e.division||"-",
-          e.status
-        ]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-      XLSX.utils.book_append_sheet(wb, ws, "RAB");
-      XLSX.writeFile(wb, "rekap_pengajuan_RAB.xlsx");
-    });
-
-    // ===== UPDATE STATUS =====
-    window.updateStatus = async (id, status) => {
-      await update(ref(db, "rabapp/pengajuan/" + id), { status });
-      alert(`Status pengajuan diperbarui menjadi ${status}`);
-      loadRABAdmin();
+      let y=25;
+      rows.forEach(r=>{doc.text(r.join(" | "),10,y);y+=8;});
+      doc.save("rekap_RAB.pdf");
+    };
+    document.getElementById("btnExportExcel").onclick=()=>{
+      const wb=XLSX.utils.book_new();
+      const ws=XLSX.utils.json_to_sheet(Object.values(allData));
+      XLSX.utils.book_append_sheet(wb,ws,"RAB");
+      XLSX.writeFile(wb,"rekap_RAB.xlsx");
     };
 
     loadRABAdmin();
